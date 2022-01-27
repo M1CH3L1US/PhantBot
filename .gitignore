@@ -1,0 +1,13 @@
+.idea
+.vscode
+
+*.suo
+*.user
+
+[Ll]og/
+[Ll]ogs/
+[Bb]ld/
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
