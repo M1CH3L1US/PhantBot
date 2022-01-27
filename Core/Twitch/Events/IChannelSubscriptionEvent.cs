@@ -1,3 +1,5 @@
+using Core.Twitch.Enums;
+
 namespace Core.Twitch.Events;
 
 public interface IChannelSubscriptionEvent : ITwitchEvent {

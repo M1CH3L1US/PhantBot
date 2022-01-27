@@ -1,8 +1,8 @@
-using Core.Twitch.DTOs;
 using Core.Utils;
+using Infrastructure.Twitch.DTOs;
 using Mapster;
 
-namespace Core.Twitch.MapExtensions;
+namespace Infrastructure.Twitch.MapExtensions;
 
 public static class TwitchEventMapExtension {
   public static T ToEvent<T>(this ITwitchDto dto) where T : class {

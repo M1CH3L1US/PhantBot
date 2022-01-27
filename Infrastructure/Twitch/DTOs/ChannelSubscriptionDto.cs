@@ -1,6 +1,6 @@
 // ReSharper disable InconsistentNaming
 
-namespace Core.Twitch.DTOs;
+namespace Infrastructure.Twitch.DTOs;
 
 public class ChannelSubscriptionDto : ITwitchDto {
   /// The user ID for the user who subscribed to the specified channel.

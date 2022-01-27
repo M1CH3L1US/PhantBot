@@ -1,6 +1,6 @@
 // ReSharper disable InconsistentNaming
 
-namespace Core.Twitch.DTOs;
+namespace Infrastructure.Twitch.DTOs;
 
 public class ChannelCheerDto : ITwitchDto {
   /// The number of bits cheered

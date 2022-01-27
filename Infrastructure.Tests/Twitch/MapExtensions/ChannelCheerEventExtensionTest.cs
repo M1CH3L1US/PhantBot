@@ -1,9 +1,9 @@
-using Core.Twitch.DTOs;
 using Core.Twitch.Events;
-using Core.Twitch.MapExtensions;
+using Infrastructure.Twitch.DTOs;
+using Infrastructure.Twitch.MapExtensions;
 using Xunit;
 
-namespace Core.Test.MapExtensions;
+namespace Infrastructure.Test.Twitch.MapExtensions;
 
 public class ChannelCheerEventExtensionTest {
   private readonly ChannelCheerDto _anonymousChannelCheer = new() {

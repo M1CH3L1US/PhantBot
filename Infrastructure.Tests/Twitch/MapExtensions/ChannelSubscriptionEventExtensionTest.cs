@@ -1,10 +1,10 @@
-using Core.Twitch;
-using Core.Twitch.DTOs;
+using Core.Twitch.Enums;
 using Core.Twitch.Events;
-using Core.Twitch.MapExtensions;
+using Infrastructure.Twitch.DTOs;
+using Infrastructure.Twitch.MapExtensions;
 using Xunit;
 
-namespace Core.Test.MapExtensions;
+namespace Infrastructure.Test.Twitch.MapExtensions;
 
 public class ChannelSubscriptionEventExtensionTest {
   private readonly ChannelSubscriptionDto _channelSubscription = new() {
