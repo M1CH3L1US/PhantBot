@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Reactive.Subjects;
 using System.Text;
@@ -10,7 +11,7 @@ using Websocket.Client.Models;
 namespace Infrastructure.Test.Twitch.Websocket.Mocks;
 
 public class MockWebSocketClient : IWebsocketClient {
-  public MockWebSocketClient(Subject<DisconnectionInfo> disconnectionHappenedSubject) {
+  public MockWebSocketClient() {
     MessageReceivedSubject = new Subject<ResponseMessage>();
     ReconnectionHappenedSubject = new Subject<ReconnectionInfo>();
     DisconnectionHappenedSubject = new Subject<DisconnectionInfo>();
@@ -20,10 +21,12 @@ public class MockWebSocketClient : IWebsocketClient {
   private Subject<DisconnectionInfo> DisconnectionHappenedSubject { get; }
   private Subject<ResponseMessage> MessageReceivedSubject { get; }
 
+  public List<object> MessagesSent { get; } = new();
+
   public string Name { get; set; } = "MockWebSocketClient";
   public Uri? Url { get; set; }
-  public IObservable<ResponseMessage> MessageReceived => MessageReceivedSubject;
 
+  public IObservable<ResponseMessage> MessageReceived => MessageReceivedSubject;
   public IObservable<ReconnectionInfo> ReconnectionHappened => ReconnectionHappenedSubject;
   public IObservable<DisconnectionInfo> DisconnectionHappened => DisconnectionHappenedSubject;
 
@@ -41,10 +44,13 @@ public class MockWebSocketClient : IWebsocketClient {
   }
 
   public void Dispose() {
+    IsStarted = false;
+    IsRunning = false;
   }
 
   public async Task Start() {
     IsStarted = true;
+    IsRunning = true;
   }
 
   public async Task StartOrFail() {
@@ -62,18 +68,23 @@ public class MockWebSocketClient : IWebsocketClient {
   }
 
   public void Send(string message) {
+    MessageSent(message);
   }
 
   public void Send(byte[] message) {
+    MessageSent(message);
   }
 
   public void Send(ArraySegment<byte> message) {
+    MessageSent(message);
   }
 
   public async Task SendInstant(string message) {
+    MessageSent(message);
   }
 
   public async Task SendInstant(byte[] message) {
+    MessageSent(message);
   }
 
   public Task Reconnect() {
@@ -82,6 +93,10 @@ public class MockWebSocketClient : IWebsocketClient {
 
   public Task ReconnectOrFail() {
     return Reconnect();
+  }
+
+  private void MessageSent(object message) {
+    MessagesSent.Add(message);
   }
 
   public void SendFakeMessage(object message) {

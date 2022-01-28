@@ -7,10 +7,10 @@ using Websocket.Client;
 namespace Infrastructure.Twitch.Websocket;
 
 public class TwitchWebsocketClient : ITwitchWebsocketClient {
-  private readonly WebsocketClient _ws;
-  private IDisposable? _pingInterval;
+  private readonly IWebsocketClient _ws;
+  internal IDisposable? PingInterval;
 
-  public TwitchWebsocketClient(WebsocketClient ws) {
+  public TwitchWebsocketClient(IWebsocketClient ws) {
     _ws = ws;
   }
 
@@ -25,6 +25,7 @@ public class TwitchWebsocketClient : ITwitchWebsocketClient {
   }
 
   public Task Disconnect() {
+    UnregisterPingInterval();
     return _ws.Stop(WebSocketCloseStatus.NormalClosure, "");
   }
 
@@ -37,7 +38,8 @@ public class TwitchWebsocketClient : ITwitchWebsocketClient {
   }
 
   public Task Ping() {
-    return _ws.SendInstant("{ \"type\": \"PING\" }");
+    var pingRequest = WebsocketRequestBuilder.BuildRequest(RequestType.Ping);
+    return SendMessage(pingRequest);
   }
 
   public Task ListenToTopic(ListenTopic topic) {
@@ -45,7 +47,7 @@ public class TwitchWebsocketClient : ITwitchWebsocketClient {
   }
 
   public Task ListenToTopics(IEnumerable<ListenTopic> topics) {
-    var topicString = ListenTopicStringBuilder.GetTopicStrings(topics);
+    var topicString = topics.Select(listenTopic => listenTopic.Topic);
     var data = new {
       topics = topicString.ToArray(),
       auth_token = "__"
@@ -76,10 +78,11 @@ public class TwitchWebsocketClient : ITwitchWebsocketClient {
   /// message every 5 minutes.
   private void RegisterPingInterval() {
     var interval = Observable.Interval(TimeSpan.FromMinutes(4.5));
-    _pingInterval = interval.Subscribe(_ => { Ping(); });
+    PingInterval = interval.Subscribe(_ => { Ping(); });
   }
 
   private void UnregisterPingInterval() {
-    _pingInterval?.Dispose();
+    PingInterval?.Dispose();
+    PingInterval = null;
   }
 }
