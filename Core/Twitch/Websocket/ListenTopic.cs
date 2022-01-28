@@ -1,90 +1,45 @@
 namespace Core.Twitch.Websocket;
 
-public abstract class ListenTopic {
-  protected string? ChannelId;
-  protected string? UserId;
-  internal abstract string GetString();
-}
-
-public class BitsEventTopic : ListenTopic {
-  public BitsEventTopic(string channelId) {
-    ChannelId = channelId;
+public partial class ListenTopic {
+  internal ListenTopic(string topic) {
+    Topic = topic;
   }
 
-  internal override string GetString() {
-    return $"channel-bits-events-v2.{ChannelId}";
-  }
-}
+  public string Topic { get; }
 
-public class BitsBadgeUnlockTopic : ListenTopic {
-  public BitsBadgeUnlockTopic(string channelId) {
-    ChannelId = channelId;
+  public static ListenTopic BitsEvent(string channelId) {
+    return new ListenTopic($"channel-bits-events-v2.{channelId}");
   }
 
-  internal override string GetString() {
-    return $"channel-bits-badge-unlocks.{ChannelId}";
-  }
-}
-
-public class ChannelPointsTopic : ListenTopic {
-  public ChannelPointsTopic(string channelId) {
-    ChannelId = channelId;
+  public static ListenTopic BitsBadgeUnlock(string channelId) {
+    return new ListenTopic($"channel-bits-badge-unlocks.{channelId}");
   }
 
-  internal override string GetString() {
-    return $"channel-points-channel-v1.{ChannelId}";
-  }
-}
-
-public class ChannelSubscriptionTopic : ListenTopic {
-  public ChannelSubscriptionTopic(string channelId) {
-    ChannelId = channelId;
+  public static ListenTopic ChannelPoints(string channelId) {
+    return new ListenTopic($"channel-points-channel-v1.{channelId}");
   }
 
-  internal override string GetString() {
-    return $"channel-subscribe-events-v1.{ChannelId}";
+  public static ListenTopic ChannelSubscription(string channelId) {
+    return new ListenTopic($"channel-subscribe-events-v1.{channelId}");
+  }
+
+  public static ListenTopic ChatModeratorAction(string userId, string channelId) {
+    return new ListenTopic($"chat_moderator_actions.{userId}.{channelId}");
+  }
+
+  public static ListenTopic AutoModQueue(string moderatorId, string channelId) {
+    return new ListenTopic($"automod-queue.{moderatorId}.{channelId}");
+  }
+
+  public static ListenTopic UserModerationNotification(string userId, string channelId) {
+    return new ListenTopic($"user-moderation-notifications.{userId}.{channelId}");
+  }
+
+  public static ListenTopic Whisper(string userId) {
+    return new ListenTopic($"whispers.{userId}");
   }
 }
 
-public class ChatModeratorActionTopic : ListenTopic {
-  public ChatModeratorActionTopic(string userId, string channelId) {
-    UserId = userId;
-    ChannelId = channelId;
-  }
-
-  internal override string GetString() {
-    return $"chat_moderator_actions.{UserId}.{ChannelId}";
-  }
-}
-
-public class AutoModQueueTopic : ListenTopic {
-  public AutoModQueueTopic(string moderatorId, string channelId) {
-    UserId = moderatorId;
-    ChannelId = channelId;
-  }
-
-  internal override string GetString() {
-    return $"automod-queue.{UserId}.{ChannelId}";
-  }
-}
-
-public class UserModerationNotificationTopic : ListenTopic {
-  public UserModerationNotificationTopic(string userId, string channelId) {
-    UserId = userId;
-    ChannelId = channelId;
-  }
-
-  internal override string GetString() {
-    return $"user-moderation-notifications.{UserId}.{ChannelId}";
-  }
-}
-
-public class WhisperTopic : ListenTopic {
-  public WhisperTopic(string userId) {
-    UserId = userId;
-  }
-
-  internal override string GetString() {
-    return $"whispers.{UserId}";
-  }
+// Keep IDE from refactoring
+public partial class ListenTopic {
 }
