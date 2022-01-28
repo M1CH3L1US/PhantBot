@@ -33,7 +33,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Twitch" />
+      <Folder Include="Twitch\Http\Mocks" />
     </ItemGroup>
 
 </Project>

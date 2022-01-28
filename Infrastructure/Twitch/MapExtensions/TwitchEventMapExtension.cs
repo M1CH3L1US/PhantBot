@@ -1,5 +1,5 @@
 using Core.Utils;
-using Infrastructure.Twitch.DTOs;
+using Infrastructure.Twitch.Dto;
 using Mapster;
 
 namespace Infrastructure.Twitch.MapExtensions;

@@ -18,12 +18,17 @@
 
     <ItemGroup>
         <PackageReference Include="Mapster" Version="7.2.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.2-mauipre.1.22054.8" />
         <PackageReference Include="Microsoft.Reactive.Testing" Version="5.0.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="System.Reactive" Version="5.0.0" />
         <PackageReference Include="System.Reactive.Core" Version="5.0.0" />
         <PackageReference Include="System.Reactive.Linq" Version="5.0.0" />
         <PackageReference Include="Websocket.Client" Version="4.4.43" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Twitch\Dto\Api" />
     </ItemGroup>
 
 </Project>
