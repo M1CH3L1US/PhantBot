@@ -5,34 +5,76 @@ using Microsoft.Extensions.Configuration;
 namespace Infrastructure.Configuration;
 
 public class ApplicationConfiguration : IApplicationConfiguration {
-  private readonly IConfigurationSection _config;
-
   public ApplicationConfiguration(IConfiguration config) {
-    _config = config.GetSection("Twitch");
-    ValidateConfiguration();
+    var twitchConfig = config.GetSection("Twitch");
+    var streamlabsConfig = config.GetSection("Streamlabs");
+
+    Twitch = new TwitchConfiguration(twitchConfig);
+    Streamlabs = new StreamlabsConfiguration(streamlabsConfig);
+
+    ValidateConfigurationSections();
   }
 
-  [ValidateConfigurationProperty]
-  public string AccessToken => _config["AccessToken"];
+  [ValidateConfigurationSection]
+  public ITwitchConfiguration Twitch { get; }
 
-  [ValidateConfigurationProperty]
-  public string ClientId => _config["ClientId"];
+  [ValidateConfigurationSection]
+  public IStreamlabsConfiguration Streamlabs { get; }
 
-  [ValidateConfigurationProperty]
-  public string ClientSecret => _config["ClientSecret"];
+  private void ValidateConfigurationSections() {
+    GetType()
+      .GetProperties()
+      .Where(info => info.GetCustomAttribute<ValidateConfigurationSection>() is not null)
+      .Select(info => info.GetValue(this)!)
+      .ToList()
+      .ForEach(ValidateConfiguration);
+  }
 
-  private void ValidateConfiguration() {
-    var propertiesToValidate = GetType()
-                               .GetProperties()
-                               .Where(info => info.GetCustomAttribute<ValidateConfigurationProperty>() is not null)
-                               .ToList();
+  private void ValidateConfiguration(object section) {
+    var type = section.GetType();
+    section.GetType()
+           .GetProperties()
+           .Where(info =>
+             info.GetCustomAttribute<ValidateConfigurationProperty>() is not null)
+           .Where(property => {
+             var value = (string?) property.GetValue(section);
+             return string.IsNullOrEmpty(value);
+           })
+           .ToList()
+           .ForEach(property => throw new MissingConfigurationException(property.Name, type.Name));
+  }
 
-    foreach (var property in propertiesToValidate) {
-      var value = (string?) property.GetValue(this);
+  internal class TwitchConfiguration : ITwitchConfiguration {
+    private readonly IConfiguration _config;
 
-      if (string.IsNullOrEmpty(value)) {
-        throw new MissingConfigurationException(property.Name);
-      }
+    public TwitchConfiguration(IConfiguration config) {
+      _config = config;
     }
+
+    [ValidateConfigurationProperty]
+    public string AccessToken => _config["AccessToken"];
+
+    [ValidateConfigurationProperty]
+    public string ClientId => _config["ClientId"];
+
+    [ValidateConfigurationProperty]
+    public string ClientSecret => _config["ClientSecret"];
+  }
+
+  internal class StreamlabsConfiguration : IStreamlabsConfiguration {
+    private readonly IConfiguration _config;
+
+    public StreamlabsConfiguration(IConfiguration config) {
+      _config = config;
+    }
+
+    [ValidateConfigurationProperty]
+    public string RedirectUri => _config["RedirectUri"];
+
+    [ValidateConfigurationProperty]
+    public string ClientId => _config["ClientId"];
+
+    [ValidateConfigurationProperty]
+    public string ClientSecret => _config["ClientSecret"];
   }
 }

@@ -8,18 +8,23 @@ namespace Infrastructure.Test.Configuration;
 public class MockApplicationConfiguration : IConfigurationSection {
   public Dictionary<string, string> Values = new();
 
-  public MockApplicationConfiguration(string? section = null) {
-    if (section is not null) {
-      Key = section;
+  public MockApplicationConfiguration(string? sectionName = null) {
+    if (sectionName is not null) {
+      Key = sectionName;
       return;
     }
 
-    var twtichConfigurationSection = new MockApplicationConfiguration("Twitch");
-    Sections["Twitch"] = twtichConfigurationSection;
+    MakeAndAddSection("Twitch", section => {
+      section.Values.Add("AccessToken", GetGuid());
+      section.Values.Add("ClientId", GetGuid());
+      section.Values.Add("ClientSecret", GetGuid());
+    });
 
-    twtichConfigurationSection.Values.Add("AccessToken", GetGuid());
-    twtichConfigurationSection.Values.Add("ClientId", GetGuid());
-    twtichConfigurationSection.Values.Add("ClientSecret", GetGuid());
+    MakeAndAddSection("Streamlabs", section => {
+      section.Values.Add("RedirectUri", GetGuid());
+      section.Values.Add("ClientId", GetGuid());
+      section.Values.Add("ClientSecret", GetGuid());
+    });
   }
 
   public Dictionary<string, IConfigurationSection> Sections { get; set; } = new();
@@ -44,6 +49,12 @@ public class MockApplicationConfiguration : IConfigurationSection {
   public string? Key { get; }
   public string? Path { get; }
   public string? Value { get; set; }
+
+  public void MakeAndAddSection(string key, Action<MockApplicationConfiguration> callback) {
+    MockApplicationConfiguration section = new(key);
+    Sections[key] = section;
+    callback(section);
+  }
 
   public static MockApplicationConfiguration Create() {
     return new MockApplicationConfiguration();

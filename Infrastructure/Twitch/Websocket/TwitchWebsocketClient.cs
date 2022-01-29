@@ -65,7 +65,7 @@ public class TwitchWebsocketClient : ITwitchWebsocketClient {
       topics = topicsToListenTo
                .Select(listenTopic => listenTopic.Topic)
                .ToArray(),
-      auth_token = _config.AccessToken
+      auth_token = _config.Twitch.AccessToken
     };
     var request = WebsocketRequestBuilder.BuildRequest(RequestType.Listen, data);
 

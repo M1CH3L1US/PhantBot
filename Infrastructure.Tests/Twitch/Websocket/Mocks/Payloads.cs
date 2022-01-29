@@ -51,7 +51,7 @@ public class Payloads {
       type = "LISTEN",
       data = new {
         topics = topics.Select(t => t.Topic),
-        auth_token = _configuration.AccessToken
+        auth_token = _configuration.Twitch.AccessToken
       }
     };
   }

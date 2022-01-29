@@ -27,7 +27,7 @@ public class ApplicationConfigurationTest {
   public void Getter_ReturnsAppropriateConfigurationFromTwitchConfigSection() {
     var twitchSection = _configuration.GetSection("Twitch");
     var expectedToken = twitchSection["AccessToken"];
-    var actualToken = _sut.AccessToken;
+    var actualToken = _sut.Twitch.AccessToken;
 
     Assert.Equal(expectedToken, actualToken);
   }
