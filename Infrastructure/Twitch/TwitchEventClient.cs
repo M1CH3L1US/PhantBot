@@ -12,12 +12,12 @@ public class TwitchEventClient : ITwitchEventClient {
 
   public IObservable<IChannelCheerEvent> OnChannelCheer(string channelId) {
     var topic = ListenTopic.BitsEvent(channelId);
-    return WebsocketClient.OnMessage<IChannelCheerEvent>(topic);
+    return WebsocketClient.OnMessage() as dynamic;
   }
 
   public IObservable<IChannelSubscriptionEvent> OnChannelSubscribe(string channelId) {
     var topic = ListenTopic.ChannelSubscription(channelId);
-    return WebsocketClient.OnMessage<IChannelSubscriptionEvent>(topic);
+    return WebsocketClient.OnMessage() as dynamic;
   }
 
   public IObservable<string> OnChannelMessage() {

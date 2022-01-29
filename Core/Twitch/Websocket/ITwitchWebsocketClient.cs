@@ -13,5 +13,5 @@ public interface ITwitchWebsocketClient {
   public Task ListenToTopic(ListenTopic topic);
   public Task ListenToTopics(IEnumerable<ListenTopic> topics);
 
-  public IObservable<T> OnMessage<T>(ListenTopic topic) where T : class;
+  public IObservable<string> OnMessage();
 }

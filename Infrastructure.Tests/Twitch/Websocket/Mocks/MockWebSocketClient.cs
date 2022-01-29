@@ -36,7 +36,7 @@ public class MockWebSocketClient : IWebsocketClient {
   public bool IsRunning { get; private set; }
   public bool IsReconnectionEnabled { get; set; }
   public bool IsTextMessageConversionEnabled { get; set; }
-  public Encoding MessageEncoding { get; set; }
+  public Encoding? MessageEncoding { get; set; }
   public ClientWebSocket? NativeClient { get; } = null;
 
   public void StreamFakeMessage(ResponseMessage message) {

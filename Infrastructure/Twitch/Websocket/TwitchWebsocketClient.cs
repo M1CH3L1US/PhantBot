@@ -1,5 +1,6 @@
 using System.Net.WebSockets;
 using System.Reactive.Linq;
+using Core.Configuration;
 using Core.Twitch.Websocket;
 using Newtonsoft.Json;
 using Websocket.Client;
@@ -7,17 +8,23 @@ using Websocket.Client;
 namespace Infrastructure.Twitch.Websocket;
 
 public class TwitchWebsocketClient : ITwitchWebsocketClient {
+  private readonly IApplicationConfiguration _config;
   private readonly IWebsocketClient _ws;
+  internal List<ListenTopic> ListeningTo = new();
   internal IDisposable? PingInterval;
 
-  public TwitchWebsocketClient(IWebsocketClient ws) {
+
+  public TwitchWebsocketClient(IWebsocketClient ws, IApplicationConfiguration config) {
     _ws = ws;
+    _config = config;
   }
 
   public bool IsConnected => _ws.IsRunning;
 
   public Task Connect() {
-    if (IsConnected) throw new InvalidOperationException("Already connected");
+    if (IsConnected) {
+      throw new InvalidOperationException("Already connected");
+    }
 
     RegisterPingInterval();
 
@@ -30,7 +37,9 @@ public class TwitchWebsocketClient : ITwitchWebsocketClient {
   }
 
   public async Task Reconnect() {
-    if (!IsConnected) return;
+    if (!IsConnected) {
+      return;
+    }
 
     UnregisterPingInterval();
     await _ws.ReconnectOrFail();
@@ -47,10 +56,16 @@ public class TwitchWebsocketClient : ITwitchWebsocketClient {
   }
 
   public Task ListenToTopics(IEnumerable<ListenTopic> topics) {
-    var topicString = topics.Select(listenTopic => listenTopic.Topic);
+    var topicsToListenTo = topics
+                           .Where(topic => !IsListeningToTopic(topic))
+                           .ToList();
+    ListeningTo.AddRange(topicsToListenTo);
+
     var data = new {
-      topics = topicString.ToArray(),
-      auth_token = "__"
+      topics = topicsToListenTo
+               .Select(listenTopic => listenTopic.Topic)
+               .ToArray(),
+      auth_token = _config.AccessToken
     };
     var request = WebsocketRequestBuilder.BuildRequest(RequestType.Listen, data);
 
@@ -62,16 +77,20 @@ public class TwitchWebsocketClient : ITwitchWebsocketClient {
     return _ws.SendInstant(jsonMessage);
   }
 
-  public IObservable<T> OnMessage<T>(ListenTopic topic) where T : class {
-    if (!IsConnected) throw new InvalidOperationException("Not connected");
+  public IObservable<string> OnMessage() {
+    if (!IsConnected) {
+      throw new InvalidOperationException("Not connected");
+    }
 
-    return _ws.MessageReceived
-              .Select(m => m.Text)
-              .Select(JsonConvert.DeserializeObject<T>)!;
+    return _ws.MessageReceived.Select(msg => msg.Text);
   }
 
   ~TwitchWebsocketClient() {
     _ws.Dispose();
+  }
+
+  private bool IsListeningToTopic(ListenTopic topic) {
+    return ListeningTo.Any(listenTopic => listenTopic.Topic == topic.Topic);
   }
 
   /// The Twitch API requires us to send a PING
