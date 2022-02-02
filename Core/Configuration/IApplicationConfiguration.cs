@@ -3,6 +3,8 @@ namespace Core.Configuration;
 public interface IApplicationConfiguration {
   public ITwitchConfiguration Twitch { get; }
   public IStreamlabsConfiguration Streamlabs { get; }
+
+  public void Deconstruct(out ITwitchConfiguration twitch, out IStreamlabsConfiguration streamlabs);
 }
 
 public interface ITwitchConfiguration {

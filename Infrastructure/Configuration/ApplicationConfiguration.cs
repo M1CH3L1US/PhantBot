@@ -21,6 +21,11 @@ public class ApplicationConfiguration : IApplicationConfiguration {
   [ValidateConfigurationSection]
   public IStreamlabsConfiguration Streamlabs { get; }
 
+  public void Deconstruct(out ITwitchConfiguration twitch, out IStreamlabsConfiguration streamlabs) {
+    twitch = Twitch;
+    streamlabs = Streamlabs;
+  }
+
   private void ValidateConfigurationSections() {
     GetType()
       .GetProperties()

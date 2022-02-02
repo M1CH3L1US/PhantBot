@@ -30,7 +30,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Streamlabs" />
       <Folder Include="Twitch\Dto\Api" />
     </ItemGroup>
 

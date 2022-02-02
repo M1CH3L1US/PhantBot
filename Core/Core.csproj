@@ -23,7 +23,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Streamlabs" />
       <Folder Include="Twitch\Exceptions" />
     </ItemGroup>
 

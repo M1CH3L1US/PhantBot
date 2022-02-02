@@ -1,4 +1,4 @@
-namespace Core.Twitch.Enums;
+namespace Core.Enums;
 
 public enum ChannelSubscriptionTier {
   TierOne = 1000,

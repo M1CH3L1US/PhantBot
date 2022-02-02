@@ -1,4 +1,4 @@
-using Core.Twitch.Enums;
+using Core.Enums;
 
 namespace Core.Twitch.Events;
 
