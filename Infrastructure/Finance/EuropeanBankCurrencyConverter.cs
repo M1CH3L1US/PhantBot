@@ -1,31 +1,57 @@
 using System.Xml;
 using Core.Finance;
+using Core.Interfaces;
 
 namespace Infrastructure.Finance;
 
+/// Exchange rate converter using the European Central Bank's web service.
+/// https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html#dev
 public class EuropeanBankCurrencyConverter : ICurrencyConverter {
   private const string EcbNinetyDayHistoryUrl = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist-90d.xml";
-  private readonly HttpClient _httpClient;
+  private readonly IHttpClient _httpClient;
 
-  internal XmlElement? _exchangeRates;
+  internal XmlElement? ExchangeRates;
 
-  public EuropeanBankCurrencyConverter(HttpClient httpClient) {
+  public EuropeanBankCurrencyConverter(IHttpClient httpClient) {
     _httpClient = httpClient;
   }
 
+
   public async Task<decimal> Convert(decimal amount, ICurrency from, ICurrency to) {
-    var fromRate = await GetRate(from);
-    var toRate = await GetRate(to);
+    if (amount <= 0) {
+      throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be greater than zero.");
+    }
+
+    var fromRate = await GetConversionRateFromEuro(from);
+    var toRate = await GetConversionRateFromEuro(to);
 
     return amount * (toRate / fromRate);
   }
 
-  internal async Task<decimal> GetRate(ICurrency currency) {
-    if (_exchangeRates is null) {
+  public async Task<decimal> ConvertOrDefault(decimal amount, ICurrency from, ICurrency to, decimal defaultValue) {
+    try {
+      return await Convert(amount, from, to);
+    }
+    catch (Exception) {
+      return defaultValue;
+    }
+  }
+
+  internal async Task<decimal> GetConversionRateFromEuro(ICurrency currency) {
+    if (ExchangeRates is null) {
       await FetchExchangeRates();
     }
 
-    var currencyNode = _exchangeRates!.SelectSingleNode($"//*[@currency='{currency.Symbol}']");
+    if (currency.Symbol == "EUR") {
+      return 1;
+    }
+
+    var currencyNode = ExchangeRates!.SelectSingleNode($"//*[@currency='{currency.Symbol}']");
+
+    if (currencyNode is null) {
+      throw new CurrencyNotFoundException(currency);
+    }
+
     var rate = currencyNode!.Attributes!["rate"]!.Value;
     return decimal.Parse(rate);
   }
@@ -43,7 +69,7 @@ public class EuropeanBankCurrencyConverter : ICurrencyConverter {
     ////      ...
     var exchangeRateNode = document["gesmes:Envelope"]!["Cube"]!["Cube"]!;
     //// <Cube currency="USD" rate="1.098"/>
-    _exchangeRates = exchangeRateNode;
+    ExchangeRates = exchangeRateNode;
   }
 
   internal async Task<XmlDocument> GetXmlDocument() {

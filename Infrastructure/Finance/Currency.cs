@@ -3,9 +3,9 @@ using Core.Finance;
 namespace Infrastructure.Finance;
 
 public class Currency : ICurrency {
-  public Currency(string name, string symbol) {
+  public Currency(string symbol, string name) {
     Name = name;
-    Symbol = symbol;
+    Symbol = symbol.ToUpper();
   }
 
   public static ICurrency Jpy { get; } = new Currency("JPY", nameof(Jpy));
@@ -40,6 +40,7 @@ public class Currency : ICurrency {
   public static ICurrency Sgd { get; } = new Currency("SGD", nameof(Sgd));
   public static ICurrency Thb { get; } = new Currency("THB", nameof(Thb));
   public static ICurrency Zar { get; } = new Currency("ZAR", nameof(Zar));
+  public static ICurrency Eur { get; } = new Currency("EUR", nameof(Eur));
 
   public string Name { get; }
   public string Symbol { get; }
