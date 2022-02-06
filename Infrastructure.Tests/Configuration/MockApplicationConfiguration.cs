@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using Core.Configuration;
+using Infrastructure.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 
-namespace Infrastructure.Test.Configuration;
+namespace Infrastructure.Tests.Configuration;
 
 public class MockApplicationConfiguration : IConfigurationSection {
   public Dictionary<string, string> Values = new();
@@ -21,9 +23,11 @@ public class MockApplicationConfiguration : IConfigurationSection {
     });
 
     MakeAndAddSection("Streamlabs", section => {
-      section.Values.Add("RedirectUri", GetGuid());
+      section.Values.Add("RedirectUri", "https://localhost:5001/redirect");
       section.Values.Add("ClientId", GetGuid());
       section.Values.Add("ClientSecret", GetGuid());
+      section.Values.Add("WebsocketUri", "https://localhost:5001/websocket");
+      section.Values.Add("BaseUri", "https://localhost:5001");
     });
   }
 
@@ -56,8 +60,8 @@ public class MockApplicationConfiguration : IConfigurationSection {
     callback(section);
   }
 
-  public static MockApplicationConfiguration Create() {
-    return new MockApplicationConfiguration();
+  public static IApplicationConfiguration Create() {
+    return new ApplicationConfiguration(new MockApplicationConfiguration());
   }
 
   private string GetGuid() {

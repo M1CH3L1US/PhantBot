@@ -81,5 +81,11 @@ public class ApplicationConfiguration : IApplicationConfiguration {
 
     [ValidateConfigurationProperty]
     public string ClientSecret => _config["ClientSecret"];
+
+    [ValidateConfigurationProperty]
+    public string WebsocketUri => _config["WebsocketUri"];
+
+    [ValidateConfigurationProperty]
+    public string BaseUri => _config["BaseUri"];
   }
 }

@@ -3,14 +3,14 @@ using Infrastructure.Configuration;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 
-namespace Infrastructure.Test.Configuration;
+namespace Infrastructure.Tests.Configuration;
 
 public class ApplicationConfigurationTest {
   private readonly IConfiguration _configuration;
   private readonly IApplicationConfiguration _sut;
 
   public ApplicationConfigurationTest() {
-    _configuration = MockApplicationConfiguration.Create();
+    _configuration = new MockApplicationConfiguration();
     _sut = new ApplicationConfiguration(_configuration);
   }
 
