@@ -5,11 +5,11 @@ using Core.Finance;
 using Core.Interfaces;
 using FluentAssertions;
 using Infrastructure.Finance;
-using Infrastructure.Test.Utils;
+using Infrastructure.Tests.Utils;
 using Moq;
 using Xunit;
 
-namespace Infrastructure.Test.Finance;
+namespace Infrastructure.Tests.Finance;
 
 public class EuropeanBankCurrencyConverterTest {
   private readonly EuropeanBankCurrencyConverter _sut;

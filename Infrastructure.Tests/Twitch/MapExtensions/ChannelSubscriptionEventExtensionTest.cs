@@ -1,6 +1,6 @@
 using Xunit;
 
-namespace Infrastructure.Test.Twitch.MapExtensions;
+namespace Infrastructure.Tests.Twitch.MapExtensions;
 
 public class ChannelSubscriptionEventExtensionTest {
   [Fact]

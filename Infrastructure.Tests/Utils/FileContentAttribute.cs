@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Xunit.Sdk;
 
-namespace Infrastructure.Test.Utils;
+namespace Infrastructure.Tests.Utils;
 
 [AttributeUsage(AttributeTargets.Method)]
 public class FileContentAttribute : DataAttribute {

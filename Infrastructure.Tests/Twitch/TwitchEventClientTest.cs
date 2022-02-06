@@ -1,8 +1,4 @@
-
-namespace Infrastructure.Test.Twitch; 
+namespace Infrastructure.Tests.Twitch;
 
 public class TwitchEventClientTest {
- 
-  
-  
 }

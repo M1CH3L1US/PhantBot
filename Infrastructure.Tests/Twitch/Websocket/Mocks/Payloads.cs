@@ -3,7 +3,7 @@ using System.Linq;
 using Core.Configuration;
 using Core.Twitch.Websocket;
 
-namespace Infrastructure.Test.Twitch.Websocket.Mocks;
+namespace Infrastructure.Tests.Twitch.Websocket.Mocks;
 
 public class Payloads {
   private readonly IApplicationConfiguration _configuration;

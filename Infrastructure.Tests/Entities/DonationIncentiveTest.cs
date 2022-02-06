@@ -2,7 +2,7 @@ using Core.Entities;
 using Infrastructure.Entities;
 using Xunit;
 
-namespace Infrastructure.Test.Entities;
+namespace Infrastructure.Tests.Entities;
 
 public class DonationIncentiveTest {
   [Fact]

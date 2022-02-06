@@ -3,7 +3,7 @@ using Infrastructure.Entities;
 using Infrastructure.Repositories;
 using Xunit;
 
-namespace Infrastructure.Test.Repositories;
+namespace Infrastructure.Tests.Repositories;
 
 public class DonationIncentiveMemoryRepositoryTest {
   private readonly IDonationIncentiveRepository _sut = new DonationIncentiveMemoryRepository();

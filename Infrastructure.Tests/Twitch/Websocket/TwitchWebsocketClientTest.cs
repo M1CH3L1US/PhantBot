@@ -2,14 +2,14 @@ using System;
 using System.Linq;
 using Core.Configuration;
 using Core.Twitch.Websocket;
-using Infrastructure.Configuration;
-using Infrastructure.Test.Configuration;
-using Infrastructure.Test.Twitch.Websocket.Mocks;
+using Infrastructure.Tests.Configuration;
+using Infrastructure.Tests.Twitch.Websocket.Mocks;
+using Infrastructure.Tests.Utils;
 using Infrastructure.Twitch.Websocket;
 using Newtonsoft.Json;
 using Xunit;
 
-namespace Infrastructure.Test.Twitch.Websocket;
+namespace Infrastructure.Tests.Twitch.Websocket;
 
 public class TwitchWebsocketClientTest {
   private readonly IApplicationConfiguration _configuration;
@@ -19,7 +19,7 @@ public class TwitchWebsocketClientTest {
 
   public TwitchWebsocketClientTest() {
     _websocketClient = new MockWebSocketClient();
-    _configuration = new ApplicationConfiguration(MockApplicationConfiguration.Create());
+    _configuration = MockApplicationConfiguration.Create();
     _sut = new TwitchWebsocketClient(_websocketClient, _configuration);
     _paylods = new Payloads(_configuration);
   }
@@ -77,7 +77,7 @@ public class TwitchWebsocketClientTest {
 
     string? response = null;
     _sut.OnMessage().Subscribe(res => response = res);
-    _websocketClient.SendFakeMessage(_paylods.PingResponse);
+    _websocketClient.ReceiveFakeMessage(_paylods.PingResponse);
     var expectedResponse = JsonConvert.SerializeObject(_paylods.PingResponse);
 
     Assert.Equal(response, expectedResponse);
@@ -111,7 +111,7 @@ public class TwitchWebsocketClientTest {
 
     string? response = null;
     _sut.OnMessage().Subscribe(res => response = res);
-    _websocketClient.SendFakeMessage(_paylods.BitsMessage);
+    _websocketClient.ReceiveFakeMessage(_paylods.BitsMessage);
     var expectedResponse = JsonConvert.SerializeObject(_paylods.BitsMessage);
 
     Assert.Equal(response, expectedResponse);

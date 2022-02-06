@@ -1,5 +1,4 @@
-namespace Infrastructure.Test.Twitch.Http; 
+namespace Infrastructure.Tests.Twitch.Http;
 
 public class TwitchHttpClientTest {
-  
 }

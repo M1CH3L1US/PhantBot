@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using Websocket.Client;
 using Websocket.Client.Models;
 
-namespace Infrastructure.Test.Twitch.Websocket.Mocks;
+namespace Infrastructure.Tests.Utils;
 
 public class MockWebSocketClient : IWebsocketClient {
   public MockWebSocketClient() {
@@ -99,7 +99,7 @@ public class MockWebSocketClient : IWebsocketClient {
     MessagesSent.Add(message);
   }
 
-  public void SendFakeMessage(object message) {
+  public void ReceiveFakeMessage(object message) {
     var jsonMessage = JsonConvert.SerializeObject(message);
     var r = ResponseMessage.TextMessage(jsonMessage);
     MessageReceivedSubject.OnNext(r);
