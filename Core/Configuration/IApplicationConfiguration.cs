@@ -17,6 +17,8 @@ public interface IStreamlabsConfiguration {
   public string RedirectUri { get; }
   public string ClientId { get; }
   public string ClientSecret { get; }
+  public string WebsocketUri { get; }
+  public string BaseUri { get; }
 }
 
 [AttributeUsage(AttributeTargets.Property)]

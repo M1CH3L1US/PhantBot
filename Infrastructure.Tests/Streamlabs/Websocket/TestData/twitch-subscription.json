@@ -1,0 +1,16 @@
+{
+  "type": "subscription",
+  "message": [
+    {
+      "name": "kevin",
+      "months": 7,
+      "message": "sub message",
+      "emotes": null,
+      "sub_plan": "2000",
+      "sub_plan_name": "Sample Plan name",
+      "sub_type": "resub",
+      "_id": "a226a8c223634afdc368439c1da7aaba"
+    }
+  ],
+  "for": "twitch_account"
+}

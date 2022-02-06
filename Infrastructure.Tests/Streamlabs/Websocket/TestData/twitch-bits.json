@@ -1,0 +1,14 @@
+{
+  "type": "bits",
+  "message": [
+    {
+      "id": "fc546f7d-aab8-42b2-9933-8681e9fb5eb0",
+      "name": "h4r5h48002",
+      "amount": "1",
+      "emotes": null,
+      "message": "streamlabs1",
+      "_id": "74a0b93e736f1f14762111f8ae34bf42"
+    }
+  ],
+  "for": "twitch_account"
+}

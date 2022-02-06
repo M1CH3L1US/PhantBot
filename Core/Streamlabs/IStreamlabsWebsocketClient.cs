@@ -6,5 +6,5 @@ public interface IStreamlabsWebsocketClient : IDisposable {
   public Task Connect();
   public Task Disconnect();
 
-  public IObservable<object> OnEvent();
+  public IObservable<string> OnEvent();
 }
