@@ -1,3 +1,4 @@
+using Core.Finance;
 using Core.Streamlabs.Events;
 using Infrastructure.Shared.Typing;
 using Newtonsoft.Json;
@@ -5,8 +6,8 @@ using Newtonsoft.Json;
 namespace Infrastructure.Streamlabs.Websocket.Dto;
 
 public class StreamlabsDonation : IStreamlabsDonation, IEventDto {
-  private string _formattedAmount;
-
+  private decimal _amount { get; set; }
+  private string _currency { get; set; }
   public string EventName { get; } = "donation";
 
   [JsonProperty("name")]
@@ -19,22 +20,24 @@ public class StreamlabsDonation : IStreamlabsDonation, IEventDto {
   string? IStreamlabsDonation.UserId { get; set; }
 
   [JsonProperty("currency")]
-  string IStreamlabsDonation.Currency { get; set; }
+  string IStreamlabsDonation.Currency {
+    get => _currency;
+    set => _currency = value;
+  }
 
   [JsonProperty("amount")]
-  decimal IStreamlabsDonation.Amount { get; set; }
+  decimal IStreamlabsDonation.Amount {
+    get => _amount;
+    set => _amount = value;
+  }
 
   [JsonProperty("formattedAmount")]
-  string IStreamlabsDonation.FormattedAmount {
-    get => _formattedAmount;
-    set => _formattedAmount = value;
-  }
+  string IStreamlabsDonation.FormattedAmount { get; set; }
 
   [JsonProperty("from")]
   string IStreamlabsDonation.FromName { get; set; }
 
-
-  public string GetValueString() {
-    return _formattedAmount;
+  public Task<decimal> ConvertToCurrency(IDonationConverter converter) {
+    return converter.ConvertFromStreamlabsDonation(this);
   }
 }

@@ -1,4 +1,5 @@
 using Core.Enums;
+using Core.Finance;
 using Core.Streamlabs.Events;
 using Infrastructure.Shared.Typing;
 using Newtonsoft.Json;
@@ -25,4 +26,8 @@ public class TwitchSubscription : ITwitchSubscription, IEventDto {
 
   [JsonProperty("sub_plan")]
   ChannelSubscriptionTier ITwitchSubscription.SubscriptionTier { get; set; }
+
+  public Task<decimal> ConvertToCurrency(IDonationConverter converter) {
+    return converter.ConvertFromTwitchSubscription(this);
+  }
 }

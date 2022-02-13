@@ -5,7 +5,6 @@ using Xunit.Sdk;
 
 namespace Infrastructure.Tests.Utils;
 
-[AttributeUsage(AttributeTargets.Method)]
 public class FileContentAttribute : DataAttribute {
   private readonly string _filePath;
 

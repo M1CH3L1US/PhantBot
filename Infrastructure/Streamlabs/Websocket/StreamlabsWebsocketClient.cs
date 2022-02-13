@@ -1,5 +1,6 @@
 using System.Net.WebSockets;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Core.Configuration;
 using Core.Streamlabs;
 using Websocket.Client;
@@ -21,6 +22,8 @@ public class StreamlabsWebsocketClient : IStreamlabsWebsocketClient {
   internal IStreamlabsConfiguration Configuration { get; }
   internal IStreamlabsAuthClient AuthClient { get; }
 
+  public ISubject<string> WebsocketEventReceived { get; } = new Subject<string>();
+
   public bool IsConnected => WebsocketClient.IsRunning;
 
   public async Task Connect() {
@@ -29,6 +32,7 @@ public class StreamlabsWebsocketClient : IStreamlabsWebsocketClient {
     }
 
     await InitializeClient();
+    SubscribeToEvents();
     await WebsocketClient.Start();
   }
 
@@ -49,13 +53,17 @@ public class StreamlabsWebsocketClient : IStreamlabsWebsocketClient {
       throw new InvalidOperationException("Not connected");
     }
 
-    return WebsocketClient.MessageReceived
-                          .Select(message => message.Text);
+    return WebsocketEventReceived;
   }
 
   private async Task InitializeClient() {
     var websocketUrl = await GetConnectionUri();
     WebsocketClient.Url = new Uri(websocketUrl);
+  }
+
+  private void SubscribeToEvents() {
+    WebsocketClient.MessageReceived.Select(message => message.Text)
+                   .Subscribe(WebsocketEventReceived);
   }
 
   private async Task<string> GetConnectionUri() {

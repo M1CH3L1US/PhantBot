@@ -1,8 +1,11 @@
 using Core.Configuration;
+using Core.Finance;
 using Core.Interfaces;
 using Core.Twitch.Http;
 using Core.Twitch.Websocket;
 using Infrastructure.Configuration;
+using Infrastructure.Finance;
+using Infrastructure.Shared.Typing;
 using Infrastructure.Twitch;
 using Infrastructure.Twitch.Http;
 using Infrastructure.Twitch.Websocket;
@@ -25,5 +28,11 @@ public static class ServiceCollectionExtension {
 
     services.AddSingleton<ITwitchEventClient, TwitchEventClient>();
     services.AddSingleton<ITwitchWebsocketClient, TwitchWebsocketClient>();
+    services.AddSingleton<ICurrencyConverter, EuropeanBankCurrencyConverter>();
+    services.AddSingleton<IDonationConverter>(provider => {
+      var currencyConverter = provider.GetRequiredService<ICurrencyConverter>();
+      return new DonationConverter(currencyConverter, Currency.Usd);
+    });
+    services.AddSingleton<IEventDtoContainer, EventDtoContainer>();
   }
 }

@@ -26,6 +26,23 @@ public class StreamlabsEventClient : IStreamlabsEventClient, IDisposable {
 
   public ISubject<object> EventReceived { get; } = new Subject<object>();
 
+  public bool IsSubscribed { get; private set; }
+
+  public async Task SubscribeToEvents() {
+    if (IsSubscribed) {
+      return;
+    }
+
+    await WebsocketClient.Connect();
+    _websocketSubscription = WebsocketClient.OnEvent().Subscribe(OnEvent);
+    IsSubscribed = true;
+  }
+
+  public async Task UnsubscribeFromEvents() {
+    _websocketSubscription.Dispose();
+    await WebsocketClient.Disconnect();
+  }
+
   public IObservable<IDonation> DonationReceived() {
     return EventReceived.OfType<IDonation>();
   }
@@ -50,10 +67,14 @@ public class StreamlabsEventClient : IStreamlabsEventClient, IDisposable {
     }
 
     var genericEventType = typeof(BaseWebsocketEvent<>).MakeGenericType(dtoType);
-    var dto = JsonConvert.DeserializeObject(eventData, genericEventType) as BaseWebsocketEvent<object>;
-    var data = GetEventDataFromDto(dto!);
+    var dto = JsonConvert.DeserializeObject(eventData, genericEventType);
+    var data = GetEventDataFromDto(dto);
 
-    EventReceived.OnNext((IDonation) data);
+    EventReceived.OnNext(data);
+
+    if (data is IDonation donation) {
+      EventReceived.OnNext(donation);
+    }
   }
 
   private Type? GetDtoTypeFromEvent(string eventData) {
@@ -64,7 +85,7 @@ public class StreamlabsEventClient : IStreamlabsEventClient, IDisposable {
     return type?.GetType();
   }
 
-  private T GetEventDataFromDto<T>(BaseWebsocketEvent<T> dto) {
+  private object GetEventDataFromDto(dynamic dto) {
     return dto.Message[0];
   }
 }

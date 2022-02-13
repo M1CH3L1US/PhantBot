@@ -4,9 +4,9 @@
     {
       "id": 96164121,
       "name": "test",
-      "amount": "13.37",
-      "formatted_amount": "$13.37",
-      "formattedAmount": "$13.37",
+      "amount": "1.50",
+      "formatted_amount": "$1.50",
+      "formattedAmount": "$1.50",
       "message": "test donation",
       "currency": "USD",
       "emotes": null,

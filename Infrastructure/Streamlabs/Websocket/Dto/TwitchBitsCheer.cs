@@ -1,3 +1,4 @@
+using Core.Finance;
 using Core.Streamlabs.Events;
 using Infrastructure.Shared.Typing;
 using Newtonsoft.Json;
@@ -15,4 +16,8 @@ public class TwitchBitsCheer : ITwitchBitsCheer, IEventDto {
 
   [JsonProperty("amount")]
   int ITwitchBitsCheer.Amount { get; set; }
+
+  public Task<decimal> ConvertToCurrency(IDonationConverter converter) {
+    return converter.ConvertFromBits(this);
+  }
 }

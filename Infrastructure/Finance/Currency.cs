@@ -44,4 +44,13 @@ public class Currency : ICurrency {
 
   public string Name { get; }
   public string Symbol { get; }
+
+  public static ICurrency? FromCode(string code) {
+    var currency = typeof(Currency).GetFields()
+                                   .Where(f => f.IsStatic)
+                                   .Where(f => string.Equals(f.Name, code, StringComparison.CurrentCultureIgnoreCase))
+                                   .Select(f => f.GetValue(null))
+                                   .FirstOrDefault();
+    return currency as ICurrency;
+  }
 }
