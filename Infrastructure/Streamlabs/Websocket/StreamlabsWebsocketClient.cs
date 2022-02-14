@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Core.Configuration;
 using Core.Streamlabs;
+using Microsoft.Extensions.Options;
 using Websocket.Client;
 
 namespace Infrastructure.Streamlabs.Websocket;
@@ -11,15 +12,15 @@ public class StreamlabsWebsocketClient : IStreamlabsWebsocketClient {
   public StreamlabsWebsocketClient(
     IWebsocketClient websocketClient,
     IStreamlabsAuthClient authClient,
-    IApplicationConfiguration configuration
+    IOptions<StreamlabsConfiguration> configuration
   ) {
     WebsocketClient = websocketClient;
     AuthClient = authClient;
-    Configuration = configuration.Streamlabs;
+    Configuration = configuration.Value;
   }
 
   internal IWebsocketClient WebsocketClient { get; }
-  internal IStreamlabsConfiguration Configuration { get; }
+  internal StreamlabsConfiguration Configuration { get; }
   internal IStreamlabsAuthClient AuthClient { get; }
 
   public ISubject<string> WebsocketEventReceived { get; } = new Subject<string>();

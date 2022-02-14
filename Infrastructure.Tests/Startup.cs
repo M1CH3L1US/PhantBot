@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
 using Core.Authentication;
 using Core.Configuration;
 using Core.Finance;
@@ -10,28 +13,37 @@ using Infrastructure.Streamlabs;
 using Infrastructure.Streamlabs.Websocket;
 using Infrastructure.Streamlabs.Websocket.Dto;
 using Infrastructure.Tests.Authentication;
-using Infrastructure.Tests.Configuration;
 using Infrastructure.Tests.Finance;
 using Infrastructure.Tests.Mocking.Http;
 using Infrastructure.Tests.Streamlabs;
 using Infrastructure.Tests.Utils;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Websocket.Client;
 
 namespace Infrastructure.Tests;
 
 public class Startup {
   public void ConfigureServices(IServiceCollection services) {
-    services.AddSingleton(MockApplicationConfiguration.Create());
+    var configuration = new ConfigurationBuilder()
+                        .SetBasePath(Environment.CurrentDirectory)
+                        .AddJsonFile("appsettings.json", false)
+                        .Build();
+
+    services.Configure<StreamlabsConfiguration>(configuration.GetRequiredSection("Streamlabs"));
+    services.Configure<TwitchConfiguration>(configuration.GetRequiredSection("Twitch"));
+    services.Configure<StorageConfiguration>(configuration.GetRequiredSection("Storage"));
+
     services.AddTransient<IStreamlabsWebsocketClient, StreamlabsWebsocketClient>();
     services.AddTransient<IWebsocketClient, MockWebSocketClient>();
     services.AddTransient<MockWebSocketClient>();
     services.AddTransient<IStreamlabsAuthClient, StreamlabsAuthClient>();
     services.AddSingleton<ICurrencyConverter, EuropeanBankCurrencyConverter>();
     services.AddTransient<IHttpClient>(provider => {
-      var configuration = provider.GetRequiredService<IApplicationConfiguration>();
+      var configuration = provider.GetRequiredService<IOptions<StreamlabsConfiguration>>();
       return MockHttpClient.Configure()
-                           .MakeStreamlabsClient(configuration)
+                           .MakeStreamlabsClient(configuration.Value)
                            .MakeFinanceClient();
     });
     services.AddSingleton<IAuthenticationCodeStore>(_ => MockAuthenticationCodeStore
@@ -51,5 +63,17 @@ public class Startup {
       var currencyConverter = provider.GetRequiredService<ICurrencyConverter>();
       return new DonationConverter(currencyConverter, Currency.Usd);
     });
+    services.AddSingleton<IFileSystem, MockFileSystem>();
+    // services.AddSingleton<IFileSystem>(provider => {
+    // var applicationConfig = provider.GetRequiredService<IApplicationConfiguration>();
+    // var incentiveFilePath = applicationConfig.Storage.IncentiveFilePath;
+    // var mockFiles = new Dictionary<string, MockFileData> {
+    //   {
+    //     incentiveFilePath,
+    //     new MockFileData("")
+    //   }
+    // };
+    // return new MockFileSystem(mockFiles);
+    // });
   }
 }

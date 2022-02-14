@@ -4,6 +4,7 @@ using Core.Interfaces;
 using Core.Streamlabs;
 using Infrastructure.Authentication;
 using Infrastructure.Streamlabs.Websocket.Dto;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace Infrastructure.Streamlabs;
@@ -11,7 +12,7 @@ namespace Infrastructure.Streamlabs;
 public class StreamlabsAuthClient : IStreamlabsAuthClient {
   private const string Category = "Streamlabs";
   internal readonly IAuthenticationCodeStore AuthenticationCodeStore;
-  internal readonly IStreamlabsConfiguration Configuration;
+  internal readonly StreamlabsConfiguration Configuration;
   internal readonly IHttpClient HttpClient;
 
   internal string? SocketAccessToken;
@@ -19,10 +20,10 @@ public class StreamlabsAuthClient : IStreamlabsAuthClient {
 
   public StreamlabsAuthClient(
     IHttpClient httpClient,
-    IApplicationConfiguration configuration,
+    IOptions<StreamlabsConfiguration> configuration,
     IAuthenticationCodeStore authenticationCodeStore
   ) {
-    Configuration = configuration.Streamlabs;
+    Configuration = configuration.Value;
     HttpClient = httpClient;
     AuthenticationCodeStore = authenticationCodeStore;
   }

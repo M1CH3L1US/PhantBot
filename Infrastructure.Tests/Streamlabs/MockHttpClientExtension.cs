@@ -11,10 +11,9 @@ namespace Infrastructure.Tests.Streamlabs;
 
 public static class MockHttpClientExtension {
   public static MockHttpClient
-    MakeStreamlabsClient(this MockHttpClient client, IApplicationConfiguration configuration) {
-    var (_, streamlabs) = configuration;
-    var authTokenUrl = $"{streamlabs.BaseUri}/token";
-    var socketTokenUrl = $"{streamlabs.BaseUri}/socket/token";
+    MakeStreamlabsClient(this MockHttpClient client, StreamlabsConfiguration configuration) {
+    var authTokenUrl = $"{configuration.BaseUri}/token";
+    var socketTokenUrl = $"{configuration.BaseUri}/socket/token";
 
     client.WithPost(
       authTokenUrl,

@@ -2,21 +2,22 @@ using System.Net.WebSockets;
 using System.Reactive.Linq;
 using Core.Configuration;
 using Core.Twitch.Websocket;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Websocket.Client;
 
 namespace Infrastructure.Twitch.Websocket;
 
 public class TwitchWebsocketClient : ITwitchWebsocketClient {
-  private readonly IApplicationConfiguration _config;
+  private readonly TwitchConfiguration _config;
   private readonly IWebsocketClient _ws;
   internal List<ListenTopic> ListeningTo = new();
   internal IDisposable? PingInterval;
 
 
-  public TwitchWebsocketClient(IWebsocketClient ws, IApplicationConfiguration config) {
+  public TwitchWebsocketClient(IWebsocketClient ws, IOptions<TwitchConfiguration> config) {
     _ws = ws;
-    _config = config;
+    _config = config.Value;
   }
 
   public bool IsConnected => _ws.IsRunning;
@@ -65,7 +66,7 @@ public class TwitchWebsocketClient : ITwitchWebsocketClient {
       topics = topicsToListenTo
                .Select(listenTopic => listenTopic.Topic)
                .ToArray(),
-      auth_token = _config.Twitch.AccessToken
+      auth_token = _config.AccessToken
     };
     var request = WebsocketRequestBuilder.BuildRequest(RequestType.Listen, data);
 

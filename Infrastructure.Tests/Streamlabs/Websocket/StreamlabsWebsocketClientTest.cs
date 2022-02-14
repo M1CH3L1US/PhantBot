@@ -6,6 +6,7 @@ using FluentAssertions;
 using Infrastructure.Streamlabs.Websocket;
 using Infrastructure.Streamlabs.Websocket.Dto;
 using Infrastructure.Tests.Utils;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -16,7 +17,7 @@ public class StreamlabsWebsocketClientTest {
   private readonly MockWebSocketClient _websocketClient;
 
   public StreamlabsWebsocketClientTest(
-    IApplicationConfiguration configuration,
+    IOptions<StreamlabsConfiguration> configuration,
     IStreamlabsAuthClient authClient,
     MockWebSocketClient websocketClient
   ) {
