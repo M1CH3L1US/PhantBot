@@ -1,9 +1,12 @@
 using Core.Entities;
+using Newtonsoft.Json;
 
 namespace Infrastructure.Entities;
 
 public class DonationIncentive : IDonationIncentive {
-  public double Goal { get; set; } = 0;
+  [JsonProperty("goal")]
+  public decimal Goal { get; set; }
 
-  public double Amount { get; set; } = 0;
+  [JsonProperty("amount")]
+  public decimal Amount { get; set; }
 }

@@ -3,18 +3,18 @@ using Core.Entities;
 namespace Core.Repositories;
 
 public interface IDonationIncentiveRepository {
-  public IDonationIncentive Get();
-  public IDonationIncentive Set(IDonationIncentive donationIncentive);
+  public Task<IDonationIncentive> Get();
+  public Task<IDonationIncentive> Set(IDonationIncentive donationIncentive);
 
-  public double GetGoal();
-  public double SetGoal(double goal);
-  public double AddToGoal(double amount);
-  public double RemoveFromGoal(double amount);
+  public Task<decimal> GetGoal();
+  public Task<decimal> SetGoal(decimal goal);
+  public Task<decimal> AddToGoal(decimal amount);
+  public Task<decimal> RemoveFromGoal(decimal amount);
 
-  public double GetAmount();
-  public double SetAmount(double amount);
-  public double AddAmount(double amount);
-  public double RemoveAmount(double amount);
+  public Task<decimal> GetAmount();
+  public Task<decimal> SetAmount(decimal amount);
+  public Task<decimal> AddAmount(decimal amount);
+  public Task<decimal> RemoveAmount(decimal amount);
 
-  public void Initialize(IDonationIncentive incentive);
+  public Task Initialize(IDonationIncentive incentive);
 }
