@@ -1,6 +1,6 @@
 namespace Core.Entities;
 
-public interface IDonationIncentive {
+public interface IDonationIncentive : ICloneable {
   public decimal Goal { get; set; }
   public decimal Amount { get; set; }
 

@@ -2,7 +2,7 @@ using Core.Authentication;
 
 namespace Infrastructure.Authentication.Stores;
 
-public class EnvironmentTokenStore : IAuthenticationCodeStore {
+public class EnvironmentAuthenticationCodeStore : IAuthenticationCodeStore {
   private const string EnvironmentKeyPrefix = "__PHANT__BOT__AUTH__TOKEN__";
 
   public bool HasAuthenticationCode(string category) {

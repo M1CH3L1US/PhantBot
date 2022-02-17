@@ -1,10 +1,13 @@
+using Core.Authentication;
 using Core.Configuration;
 using Core.Finance;
 using Core.Interfaces;
 using Core.Twitch.Http;
 using Core.Twitch.Websocket;
+using Infrastructure.Authentication.Stores;
 using Infrastructure.Finance;
 using Infrastructure.Shared.Typing;
+using Infrastructure.Streamlabs;
 using Infrastructure.Twitch;
 using Infrastructure.Twitch.Http;
 using Infrastructure.Twitch.Websocket;
@@ -22,6 +25,8 @@ public static class ServiceCollectionExtension {
 
     services.AddSingleton<ITwitchApiClient, TwitchApiClient>();
     services.AddSingleton<ITwitchHttpClient, TwitchHttpClient>();
+    services.AddSingleton<IAuthClient, StreamlabsAuthClient>();
+    services.AddSingleton<IAuthenticationCodeStore, EnvironmentAuthenticationCodeStore>();
     services.Configure<StreamlabsConfiguration>(configuration.GetRequiredSection("Streamlabs"));
     services.Configure<TwitchConfiguration>(configuration.GetRequiredSection("Twitch"));
     services.Configure<StorageConfiguration>(configuration.GetRequiredSection("Storage"));

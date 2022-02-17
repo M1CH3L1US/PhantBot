@@ -20,54 +20,83 @@ public class DonationIncentiveFileSystemRepository : IDonationIncentiveRepositor
     _filePath = configuration.Value.IncentiveFilePath;
   }
 
-  public async Task<IDonationIncentive> Get() {
+  public async Task<IDonationIncentive> GetOrCreate() {
     var fileContent = await ReadIncentiveFileContent();
     var incentive = ParseFromFileContent(fileContent);
+
+    if (!FileExists()) {
+      await Set(incentive);
+    }
+
     return incentive;
   }
 
-  public Task<IDonationIncentive> Set(IDonationIncentive donationIncentive) {
-    throw new NotImplementedException();
+  public async Task<IDonationIncentive> Set(IDonationIncentive donationIncentive) {
+    var content = ParseToFileContent(donationIncentive);
+    var previousState = await GetIncentiveFromFile();
+
+    await WriteIncentiveToFile(content);
+
+    return previousState;
   }
 
-  public Task<decimal> GetGoal() {
-    throw new NotImplementedException();
+  public async Task<decimal> GetGoal() {
+    var incentive = await GetIncentiveFromFile();
+    return incentive.Goal;
   }
 
-  public Task<decimal> SetGoal(decimal goal) {
-    throw new NotImplementedException();
+  public async Task<decimal> GetAmount() {
+    var incentive = await GetIncentiveFromFile();
+    return incentive.Amount;
   }
 
-  public Task<decimal> AddToGoal(decimal amount) {
-    throw new NotImplementedException();
+  public Task<IDonationIncentive> SetGoal(decimal goal) {
+    return UpdateIncentive(incentive => incentive.Goal = goal);
   }
 
-  public Task<decimal> RemoveFromGoal(decimal amount) {
-    throw new NotImplementedException();
+  public Task<IDonationIncentive> AddToGoal(decimal amount) {
+    return UpdateIncentive(incentive => incentive.Goal += amount);
   }
 
-  public Task<decimal> GetAmount() {
-    throw new NotImplementedException();
+  public Task<IDonationIncentive> RemoveFromGoal(decimal amount) {
+    return UpdateIncentive(incentive => incentive.Goal -= amount);
   }
 
-  public Task<decimal> SetAmount(decimal amount) {
-    throw new NotImplementedException();
+  public Task<IDonationIncentive> SetAmount(decimal amount) {
+    return UpdateIncentive(incentive => incentive.Goal = amount);
   }
 
-  public Task<decimal> AddAmount(decimal amount) {
-    throw new NotImplementedException();
+  public Task<IDonationIncentive> AddToAmount(decimal amount) {
+    return UpdateIncentive(incentive => incentive.Amount += amount);
   }
 
-  public Task<decimal> RemoveAmount(decimal amount) {
-    throw new NotImplementedException();
+  public Task<IDonationIncentive> RemoveFromAmount(decimal amount) {
+    return UpdateIncentive(incentive => incentive.Amount -= amount);
   }
 
-  public Task Initialize(IDonationIncentive incentive) {
-    throw new NotImplementedException();
+  private async Task<IDonationIncentive> UpdateIncentive(
+    Action<IDonationIncentive> updateAction
+  ) {
+    var incentive = await GetIncentiveFromFile();
+    var previousIncentive = (IDonationIncentive) incentive.Clone();
+
+    updateAction(incentive);
+    await Set(incentive);
+
+    return previousIncentive;
   }
 
   private bool FileExists() {
     return _fileWriter.FileExists(_filePath);
+  }
+
+  private async Task WriteIncentiveToFile(string content) {
+    await _fileWriter.WriteToFile(_filePath, content);
+  }
+
+  private async Task<IDonationIncentive> GetIncentiveFromFile() {
+    var fileContent = await ReadIncentiveFileContent();
+    return ParseFromFileContent(fileContent);
   }
 
   private IDonationIncentive ParseFromFileContent(string fileContent) {
@@ -83,12 +112,11 @@ public class DonationIncentiveFileSystemRepository : IDonationIncentiveRepositor
     return JsonConvert.SerializeObject(incentive, Formatting.Indented);
   }
 
-  private async Task<string> ReadIncentiveFileContent() {
-    if (FileExists()) {
-      return await _fileWriter.ReadFromFile(_filePath);
+  private async Task<string?> ReadIncentiveFileContent() {
+    if (!FileExists()) {
+      return null;
     }
 
-    await _fileWriter.CreateFile(_filePath);
-    return "";
+    return await _fileWriter.ReadFromFile(_filePath)!;
   }
 }

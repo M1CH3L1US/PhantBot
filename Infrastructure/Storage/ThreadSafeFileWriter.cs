@@ -7,10 +7,8 @@ public class ThreadSafeFileWriter : IThreadSafeFileWriter {
   private readonly IFileSystem _fileSystem;
   private readonly TimeSpan _writeTimeout;
 
-  internal IDictionary<string, Mutex> _fileLocks = new Dictionary<string, Mutex>();
-
-  public ThreadSafeFileWriter(IFileSystem fileSystem, TimeSpan writeTimeout) {
-    _writeTimeout = writeTimeout;
+  public ThreadSafeFileWriter(IFileSystem fileSystem, TimeSpan? writeTimeout) {
+    _writeTimeout = writeTimeout ?? TimeSpan.FromSeconds(10);
     _fileSystem = fileSystem;
   }
 
@@ -25,43 +23,62 @@ public class ThreadSafeFileWriter : IThreadSafeFileWriter {
     return Task.CompletedTask;
   }
 
-  public Task<string> ReadFromFile(string path) {
-    throw new NotImplementedException();
+  public Task<string>? ReadFromFile(string path) {
+    if (!FileExists(path)) {
+      throw new IOException($"File {path} does not exist");
+    }
+
+    return _fileSystem.File.ReadAllTextAsync(path);
   }
 
   public Task WriteToFile(string path, string content) {
-    return Task.Factory.StartNew(() => {
-      using var mutex = GetMutex(path);
-      var canWriteFile = false;
+    var action = () => File.WriteAllText(path, content);
+    return CallActionInMutex(path, action);
+  }
 
-      try {
-        canWriteFile = mutex.WaitOne(_writeTimeout, false);
-        File.WriteAllTextAsync(path, content);
-      }
-      finally {
-        if (canWriteFile) {
-          ReleaseMutex(mutex);
-        }
-      }
-    });
+  public Task RemoveFile(string path) {
+    if (!FileExists(path)) {
+      return Task.CompletedTask;
+    }
+
+    return CallActionInMutex(path, () => File.Delete(path));
   }
 
   public bool FileExists(string path) {
     return _fileSystem.File.Exists(path);
   }
 
+  public Task CallActionInMutex(string path, Action action) {
+    return Task.Run(() => {
+      var mutex = GetMutex(path);
+      var didAcquireMutex = false;
+
+      try {
+        didAcquireMutex = mutex.WaitOne(_writeTimeout, false);
+        if (didAcquireMutex) {
+          action();
+        }
+      }
+      finally {
+        if (didAcquireMutex) {
+          ReleaseMutex(mutex);
+        }
+        else {
+          throw new TimeoutException($"Timout reached while trying to acquire access to file \"${path}\"");
+        }
+      }
+    });
+  }
+
   private Mutex GetMutex(string path) {
     var id = GetMutexId(path);
     var mutex = new Mutex(false, id);
-    _fileLocks.TryAdd(path, mutex);
 
     return mutex;
   }
 
   private void ReleaseMutex(Mutex mutex) {
-    var mutexKey = _fileLocks.FirstOrDefault(x => x.Value == mutex);
     mutex.ReleaseMutex();
-    _fileLocks.Remove(mutexKey);
   }
 
   private string GetMutexId(string filePath) {

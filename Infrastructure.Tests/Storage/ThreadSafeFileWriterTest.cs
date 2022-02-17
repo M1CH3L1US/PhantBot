@@ -1,7 +1,7 @@
 using System;
+using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Infrastructure.Storage;
@@ -17,7 +17,7 @@ public class ThreadSafeFileWriterTest {
 
   public ThreadSafeFileWriterTest(IFileSystem fileSystem) {
     _fileSystem = fileSystem;
-    var timeout = TimeSpan.FromSeconds(2);
+    var timeout = TimeSpan.FromHours(100);
     _sut = new ThreadSafeFileWriter(fileSystem, timeout);
   }
 
@@ -70,31 +70,72 @@ public class ThreadSafeFileWriterTest {
   }
 
   [Fact]
-  public async Task WriteToFile_ShouldWaitForOtherThread_WhenFileHasAnExistingMutex() {
-    var action = async () => { await _sut.WriteToFile(FilePath, FileContent); };
+  public async Task ReadFromFile_ShouldReadFileContent_WhenFileContentExists() {
+    await _sut.CreateFile(FilePath);
+    await File.WriteAllTextAsync(FilePath, FileContent);
 
-    var thread1 = new Thread(async () => {
-      _sut._fileLocks.Any().Should().BeTrue();
-      await action();
-    });
-    var thread2 = new Thread(async () => {
-      _sut._fileLocks.Any().Should().BeTrue();
-      await action();
-    });
-    var thread3 = new Thread(async () => {
-      _sut._fileLocks.Any().Should().BeTrue();
-      await action();
-    });
-
-    thread1.Start();
-    thread2.Start();
-    thread3.Start();
+    var content = await _sut.ReadFromFile(FilePath);
+    content.Should().Be(FileContent);
   }
 
-  // _sut.Write(FilePath, FileContent);
-  // var file = FileInfo(FilePath);
+  [Fact]
+  public async Task ReadFromFile_ShouldThrowIOException_WhenFileDoesNotExist() {
+    await _sut.RemoveFile(FilePath);
+    var action = async () => await _sut.ReadFromFile(FilePath);
+    await action.Should().ThrowAsync<IOException>();
+  }
 
-  // Assert.True(file.Exists);
+  [Fact]
+  public async Task RemoveFile_ShouldRemoveFile_WhenFileExists() {
+    await _sut.CreateFile(FilePath);
+    await _sut.RemoveFile(FilePath);
 
-  // Assert.Equal(FileContent, file.OpenText().ReadToEnd());
+    File.Exists(FilePath).Should().BeFalse();
+  }
+
+  [Fact]
+  public async Task RemoveFile_ShouldNotThrowException_WhenFileDoesNotExist() {
+    var action = async () => await _sut.RemoveFile("BeepBapBoop");
+    await action.Should().NotThrowAsync();
+  }
+
+  [Fact(Skip = @"
+This test takes quite some time to run and is only used to
+initially verify that the mutex is working correctly.
+")]
+  public async Task WriteToFile_ShouldWaitForOtherThread_WhenFileHasAnExistingMutex() {
+    var bigFileContent = GetReallyBigString(1_000_000_000);
+    var action = async () => { await _sut.WriteToFile(FilePath, bigFileContent); };
+
+    var tasks = new Task[100];
+
+    for (var i = 0; i < tasks.Length; i++) {
+      tasks[i] = Task.Run(action);
+    }
+
+    try {
+      await Task.WhenAll(tasks);
+    }
+    catch (AggregateException e) {
+      Assert.True(false, "All tasks should have completed successfully");
+    }
+
+    tasks
+      .All(task => task.Exception is null)
+      .Should()
+      .BeTrue();
+
+    var content = await _sut.ReadFromFile(FilePath);
+    content.Length.Should().Be(bigFileContent.Length);
+  }
+
+  private string GetReallyBigString(int size = 100) {
+    var stringSpan = string.Create(size, "", (span, s) => {
+      for (var i = 0; i < size; i++) {
+        span[i] = 'a';
+      }
+    });
+
+    return stringSpan;
+  }
 }

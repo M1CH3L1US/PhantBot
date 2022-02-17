@@ -9,4 +9,10 @@ public class DonationIncentive : IDonationIncentive {
 
   [JsonProperty("amount")]
   public decimal Amount { get; set; }
+
+  public object Clone() {
+    return new DonationIncentive {
+      Goal = Goal, Amount = Amount
+    };
+  }
 }
