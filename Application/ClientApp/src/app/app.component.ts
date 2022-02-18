@@ -1,9 +1,15 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html'
+  selector: 'pb-root',
+  templateUrl: './app.component.html',
+  styles: [
+    `
+      :host {
+        height: 100%;
+        width: 100%;
+      }
+    `,
+  ],
 })
-export class AppComponent {
-  title = 'app';
-}
+export class AppComponent {}

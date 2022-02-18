@@ -1,16 +1,26 @@
-/* You can add global styles to this file, and also import other style files */
+@use "@angular/material" as mat;
 
-/* Provide sufficient contrast against white background */
-a {
-  color: #0366d6;
+$font-family: Inter, "Segoe UI", sans-serif;
+
+$custom-typography: mat.define-typography-config(
+  $font-family: $font-family,
+);
+
+@include mat.core($custom-typography);
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: $font-family;
 }
 
-code {
-  color: #e01a76;
+body {
+  width: 100vw;
+  height: 100vh;
+  color: white;
 }
 
-.btn-primary {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+:root {
+  --primary-color: #06090f;
 }
