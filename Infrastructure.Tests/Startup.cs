@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
+using System.Net.Http;
 using Core.Authentication;
 using Core.Configuration;
 using Core.Finance;
-using Core.Interfaces;
 using Core.Streamlabs;
 using Infrastructure.Finance;
 using Infrastructure.Shared.Typing;
@@ -40,11 +40,12 @@ public class Startup {
     services.AddTransient<MockWebSocketClient>();
     services.AddTransient<IStreamlabsAuthClient, StreamlabsAuthClient>();
     services.AddSingleton<ICurrencyConverter, EuropeanBankCurrencyConverter>();
-    services.AddTransient<IHttpClient>(provider => {
+    services.AddTransient(provider => {
       var configuration = provider.GetRequiredService<IOptions<StreamlabsConfiguration>>();
-      return MockHttpClient.Configure()
-                           .MakeStreamlabsClient(configuration.Value)
-                           .MakeFinanceClient();
+      var handler = MockHttpMessageHandler.Configure()
+                                          .MakeStreamlabsClient(configuration.Value)
+                                          .MakeFinanceClient();
+      return new HttpClient(handler);
     });
     services.AddSingleton<IAuthenticationCodeStore>(_ => MockAuthenticationCodeStore
                                                          .Create("Streamlabs")

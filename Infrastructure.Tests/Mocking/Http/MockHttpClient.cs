@@ -1,74 +1,64 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
-using Core.Interfaces;
-using Moq;
 using Newtonsoft.Json;
 
 namespace Infrastructure.Tests.Mocking.Http;
 
-public class MockHttpClient : IHttpClient {
-  public readonly Mock<IHttpClient> MockInstance;
+internal class MockHttpResponseHandler {
+  public Uri URI { get; set; }
+  public HttpResponseMessage Response { get; set; }
+  public HttpMethod Method { get; set; }
+  public Action<Uri, HttpContent>? ValidateRequest { get; set; }
+}
 
-  private MockHttpClient() {
-    MockInstance = new Mock<IHttpClient>();
+public class MockHttpMessageHandler : HttpMessageHandler {
+  private readonly List<MockHttpResponseHandler> _responseMessages = new();
+
+  private MockHttpMessageHandler() {
   }
 
-  public IHttpClient Instance => MockInstance.Object;
-
-  public Task<HttpResponseMessage> GetAsync(string url) {
-    return Instance.GetAsync(url);
+  public static MockHttpMessageHandler Configure() {
+    return new MockHttpMessageHandler();
   }
 
-  public Task<HttpResponseMessage> GetAsync(Uri url) {
-    return Instance.GetAsync(url);
-  }
-
-  public Task<HttpResponseMessage> PostAsync(string url, HttpContent? content) {
-    return Instance.PostAsync(url, content);
-  }
-
-  public Task<HttpResponseMessage> PostAsync(Uri url, HttpContent? content) {
-    return Instance.PostAsync(url, content);
-  }
-
-  public static MockHttpClient Configure() {
-    return new MockHttpClient();
-  }
-
-  public MockHttpClient WithGet<T>(string url, T response) {
+  public MockHttpMessageHandler WithGet<T>(string url, T response) {
     var res = MakeResponse(response);
-
-    MockInstance.Setup(x => x.GetAsync(url)).ReturnsAsync(res);
+    _responseMessages.Add(new MockHttpResponseHandler {
+      URI = new Uri(url),
+      Response = res,
+      Method = HttpMethod.Get
+    });
 
     return this;
   }
 
-  public MockHttpClient WithPost<T>(string url, T response, Action<Uri, HttpContent> validator) {
+  public MockHttpMessageHandler WithPost<T>(string url, T response, Action<Uri, HttpContent> validator) {
     var res = MakeResponse(response);
-
-    MockInstance.Setup(x => x.PostAsync(url, It.IsAny<HttpContent>()))
-                .Callback<string, HttpContent>((url, content) => validator(new Uri(url), content))
-                .ReturnsAsync(res);
+    _responseMessages.Add(new MockHttpResponseHandler {
+      URI = new Uri(url),
+      Response = res,
+      Method = HttpMethod.Post,
+      ValidateRequest = validator
+    });
 
     return this;
   }
 
 
-  public MockHttpClient WithPost<T>(string url, T response) {
+  public MockHttpMessageHandler WithPost<T>(string url, T response) {
     var res = MakeResponse(response);
 
-    MockInstance.Setup(x => x.PostAsync(url, It.IsAny<HttpContent>()))
-                .ReturnsAsync(res);
+    _responseMessages.Add(new MockHttpResponseHandler {
+      URI = new Uri(url),
+      Response = res,
+      Method = HttpMethod.Post
+    });
+
     return this;
-  }
-
-  private Uri MakeUri(string uri) {
-    return new Uri(uri);
-  }
-
-  private Uri MakeUri(Uri uri) {
-    return uri;
   }
 
   private HttpResponseMessage MakeResponse<T>(T value) {
@@ -84,5 +74,23 @@ public class MockHttpClient : IHttpClient {
     return new HttpResponseMessage {
       Content = new StringContent(messageContent)
     };
+  }
+
+  protected override async Task<HttpResponseMessage> SendAsync(
+    HttpRequestMessage request,
+    CancellationToken cancellationToken
+  ) {
+    var handler = _responseMessages
+      .FirstOrDefault(
+        handler => handler.Method == request.Method &&
+                   handler.URI == request.RequestUri
+      );
+
+    if (handler is null) {
+      throw new HttpRequestException($"No handler found for request to url {request.RequestUri}");
+    }
+
+    handler.ValidateRequest?.Invoke(request.RequestUri, request.Content);
+    return handler.Response;
   }
 }

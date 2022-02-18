@@ -1,6 +1,5 @@
 using System.Xml;
 using Core.Finance;
-using Core.Interfaces;
 
 namespace Infrastructure.Finance;
 
@@ -8,11 +7,11 @@ namespace Infrastructure.Finance;
 /// https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html#dev
 public class EuropeanBankCurrencyConverter : ICurrencyConverter {
   private const string EcbNinetyDayHistoryUrl = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist-90d.xml";
-  private readonly IHttpClient _httpClient;
+  private readonly HttpClient _httpClient;
 
   internal XmlElement? ExchangeRates;
 
-  public EuropeanBankCurrencyConverter(IHttpClient httpClient) {
+  public EuropeanBankCurrencyConverter(HttpClient httpClient) {
     _httpClient = httpClient;
   }
 

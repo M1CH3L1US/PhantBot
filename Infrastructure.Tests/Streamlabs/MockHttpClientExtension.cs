@@ -10,8 +10,8 @@ using Infrastructure.Tests.Utils;
 namespace Infrastructure.Tests.Streamlabs;
 
 public static class MockHttpClientExtension {
-  public static MockHttpClient
-    MakeStreamlabsClient(this MockHttpClient client, StreamlabsConfiguration configuration) {
+  public static MockHttpMessageHandler
+    MakeStreamlabsClient(this MockHttpMessageHandler client, StreamlabsConfiguration configuration) {
     var authTokenUrl = $"{configuration.BaseUri}/token";
     var socketTokenUrl = $"{configuration.BaseUri}/socket/token";
 

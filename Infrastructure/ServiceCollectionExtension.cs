@@ -1,7 +1,6 @@
 using Core.Authentication;
 using Core.Configuration;
 using Core.Finance;
-using Core.Interfaces;
 using Core.Twitch.Http;
 using Core.Twitch.Websocket;
 using Infrastructure.Authentication.Stores;
@@ -13,6 +12,7 @@ using Infrastructure.Twitch.Http;
 using Infrastructure.Twitch.Websocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Websocket.Client;
 
 namespace Infrastructure;
 
@@ -21,11 +21,12 @@ public static class ServiceCollectionExtension {
     // Allows us to use the internal abstraction rather
     // than the existing concrete class
     // ReSharper disable once SuspiciousTypeConversion.Global
-    services.AddSingleton((IHttpClient) new HttpClient());
+    services.AddSingleton(new HttpClient());
 
     services.AddSingleton<ITwitchApiClient, TwitchApiClient>();
     services.AddSingleton<ITwitchHttpClient, TwitchHttpClient>();
     services.AddSingleton<IAuthClient, StreamlabsAuthClient>();
+    services.AddSingleton<IWebsocketClient>(_ => new WebsocketClient(new Uri("")));
     services.AddSingleton<IAuthenticationCodeStore, EnvironmentAuthenticationCodeStore>();
     services.Configure<StreamlabsConfiguration>(configuration.GetRequiredSection("Streamlabs"));
     services.Configure<TwitchConfiguration>(configuration.GetRequiredSection("Twitch"));

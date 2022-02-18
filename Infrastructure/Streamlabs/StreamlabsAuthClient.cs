@@ -1,6 +1,5 @@
 using Core.Authentication;
 using Core.Configuration;
-using Core.Interfaces;
 using Core.Streamlabs;
 using Infrastructure.Authentication;
 using Infrastructure.Streamlabs.Websocket.Dto;
@@ -13,13 +12,13 @@ public class StreamlabsAuthClient : IStreamlabsAuthClient {
   private const string Category = "Streamlabs";
   internal readonly IAuthenticationCodeStore AuthenticationCodeStore;
   internal readonly StreamlabsConfiguration Configuration;
-  internal readonly IHttpClient HttpClient;
+  internal readonly HttpClient HttpClient;
 
   internal string? SocketAccessToken;
   internal IAccessTokenPair? TokenPair;
 
   public StreamlabsAuthClient(
-    IHttpClient httpClient,
+    HttpClient httpClient,
     IOptions<StreamlabsConfiguration> configuration,
     IAuthenticationCodeStore authenticationCodeStore
   ) {
