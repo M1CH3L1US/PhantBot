@@ -8,8 +8,7 @@ namespace Application.Pages;
 public class ErrorModel : PageModel {
   private readonly ILogger<ErrorModel> _logger;
 
-  public ErrorModel(ILogger<ErrorModel> logger)
-  {
+  public ErrorModel(ILogger<ErrorModel> logger) {
     _logger = logger;
   }
 
@@ -17,8 +16,7 @@ public class ErrorModel : PageModel {
 
   public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 
-  public void OnGet()
-  {
+  public void OnGet() {
     RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
   }
 }
