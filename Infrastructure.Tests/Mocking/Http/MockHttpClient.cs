@@ -36,6 +36,18 @@ public class MockHttpMessageHandler : HttpMessageHandler {
     return this;
   }
 
+  public MockHttpMessageHandler WithGet<T>(string url, T response, Action<Uri, HttpContent?> validator) {
+    var res = MakeResponse(response);
+    _responseMessages.Add(new MockHttpResponseHandler {
+      URI = new Uri(url),
+      Response = res,
+      Method = HttpMethod.Get,
+      ValidateRequest = validator
+    });
+
+    return this;
+  }
+
   public MockHttpMessageHandler WithPost<T>(string url, T response, Action<Uri, HttpContent> validator) {
     var res = MakeResponse(response);
     _responseMessages.Add(new MockHttpResponseHandler {
@@ -83,7 +95,7 @@ public class MockHttpMessageHandler : HttpMessageHandler {
     var handler = _responseMessages
       .FirstOrDefault(
         handler => handler.Method == request.Method &&
-                   handler.URI == request.RequestUri
+                   request.RequestUri?.GetLeftPart(UriPartial.Path) == handler.URI.GetLeftPart(UriPartial.Path)
       );
 
     if (handler is null) {

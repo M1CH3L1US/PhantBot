@@ -8,7 +8,7 @@ public class DonationIncentiveTest {
   [Fact]
   public void GetPercentage_IsZero_ByDefault() {
     IDonationIncentive incentive = new DonationIncentive();
-    var percentage = incentive.GetPercentage();
+    var percentage = incentive.PercentageCompleted;
 
     Assert.Equal(0, percentage);
   }
@@ -17,7 +17,7 @@ public class DonationIncentiveTest {
   [Fact]
   public void GetPercentage_CalculatesPercentage_IfGoalAndAmountAreSet() {
     IDonationIncentive incentive = new DonationIncentive {Amount = 20, Goal = 100};
-    var percentage = incentive.GetPercentage();
+    var percentage = incentive.PercentageCompleted;
 
     Assert.Equal(20, percentage);
   }

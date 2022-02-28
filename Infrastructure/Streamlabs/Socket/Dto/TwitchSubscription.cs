@@ -4,7 +4,7 @@ using Core.Streamlabs.Events;
 using Infrastructure.Shared.Typing;
 using Newtonsoft.Json;
 
-namespace Infrastructure.Streamlabs.Websocket.Dto;
+namespace Infrastructure.Streamlabs.Socket.Dto;
 
 public class TwitchSubscription : ITwitchSubscription, IEventDto {
   public string EventName { get; } = "subscription";

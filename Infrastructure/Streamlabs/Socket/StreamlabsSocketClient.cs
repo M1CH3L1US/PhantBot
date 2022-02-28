@@ -1,31 +1,32 @@
-using System.Net.WebSockets;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Core.Configuration;
 using Core.Streamlabs;
 using Microsoft.Extensions.Options;
-using Websocket.Client;
+using Socket.Io.Client.Core;
 
-namespace Infrastructure.Streamlabs.Websocket;
+namespace Infrastructure.Streamlabs.Socket;
 
-public class StreamlabsWebsocketClient : IStreamlabsWebsocketClient {
-  public StreamlabsWebsocketClient(
-    IWebsocketClient websocketClient,
+public class StreamlabsSocketClient : IStreamlabsSocketClient {
+  private Uri _connectionUrl;
+
+  public StreamlabsSocketClient(
+    ISocketIoClient socketClient,
     IStreamlabsAuthClient authClient,
     IOptions<StreamlabsConfiguration> configuration
   ) {
-    WebsocketClient = websocketClient;
+    SocketClient = socketClient;
     AuthClient = authClient;
     Configuration = configuration.Value;
   }
 
-  internal IWebsocketClient WebsocketClient { get; }
+  internal ISocketIoClient SocketClient { get; }
   internal StreamlabsConfiguration Configuration { get; }
   internal IStreamlabsAuthClient AuthClient { get; }
 
-  public ISubject<string> WebsocketEventReceived { get; } = new Subject<string>();
+  public ISubject<string> SocketEventReceived { get; } = new Subject<string>();
 
-  public bool IsConnected => WebsocketClient.IsRunning;
+  public bool IsConnected => SocketClient.IsRunning;
 
   public async Task Connect() {
     if (IsConnected) {
@@ -34,7 +35,7 @@ public class StreamlabsWebsocketClient : IStreamlabsWebsocketClient {
 
     await InitializeClient();
     SubscribeToEvents();
-    await WebsocketClient.Start();
+    await ConnectWebsocketClient();
   }
 
   public Task Disconnect() {
@@ -42,11 +43,12 @@ public class StreamlabsWebsocketClient : IStreamlabsWebsocketClient {
       return Task.CompletedTask;
     }
 
-    return WebsocketClient.Stop(WebSocketCloseStatus.NormalClosure, "Disconnecting");
+    return SocketClient.CloseAsync();
   }
 
   public void Dispose() {
     Disconnect();
+    SocketClient.Dispose();
   }
 
   public IObservable<string> OnEvent() {
@@ -54,17 +56,22 @@ public class StreamlabsWebsocketClient : IStreamlabsWebsocketClient {
       throw new InvalidOperationException("Not connected");
     }
 
-    return WebsocketEventReceived;
+    return SocketEventReceived;
   }
 
   private async Task InitializeClient() {
     var websocketUrl = await GetConnectionUri();
-    WebsocketClient.Url = new Uri(websocketUrl);
+    _connectionUrl = new Uri(websocketUrl);
+  }
+
+  private Task ConnectWebsocketClient() {
+    return SocketClient.OpenAsync(_connectionUrl);
   }
 
   private void SubscribeToEvents() {
-    WebsocketClient.MessageReceived.Select(message => message.Text)
-                   .Subscribe(WebsocketEventReceived);
+    SocketClient.On("event")
+                .Select(e => e.Data[0].ToString())
+                .Subscribe(d => SocketEventReceived.OnNext(d));
   }
 
   private async Task<string> GetConnectionUri() {

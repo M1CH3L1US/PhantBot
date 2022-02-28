@@ -5,14 +5,14 @@ namespace Infrastructure.Authentication;
 
 public class AccessTokenPair : IAccessTokenPair {
   [JsonProperty("access_token")]
-  public string AccessToken { get; }
+  public string AccessToken { get; set; }
 
   [JsonProperty("refresh_token")]
-  public string RefreshToken { get; }
+  public string RefreshToken { get; set; }
 
   [JsonProperty("token_type")]
-  public string TokenType { get; }
+  public string TokenType { get; set; }
 
   [JsonProperty("expires_in")]
-  public int ExpiresIn { get; }
+  public int ExpiresIn { get; set; }
 }

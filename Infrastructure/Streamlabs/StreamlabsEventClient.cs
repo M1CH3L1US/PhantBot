@@ -4,24 +4,24 @@ using Core.Interfaces;
 using Core.Streamlabs;
 using Core.Streamlabs.Events;
 using Infrastructure.Shared.Typing;
-using Infrastructure.Streamlabs.Websocket.Dto;
+using Infrastructure.Streamlabs.Socket.Dto;
 using Newtonsoft.Json;
 
 namespace Infrastructure.Streamlabs;
 
 public class StreamlabsEventClient : IStreamlabsEventClient, IDisposable {
-  public StreamlabsEventClient(IStreamlabsWebsocketClient websocketClient, IEventDtoContainer container) {
-    WebsocketClient = websocketClient;
+  public StreamlabsEventClient(IStreamlabsSocketClient socketClient, IEventDtoContainer container) {
+    SocketClient = socketClient;
     Container = container;
   }
 
-  public IStreamlabsWebsocketClient WebsocketClient { get; }
+  public IStreamlabsSocketClient SocketClient { get; }
   internal IDisposable _websocketSubscription { get; set; }
   internal IEventDtoContainer Container { get; }
 
   public void Dispose() {
-    WebsocketClient.Dispose();
-    _websocketSubscription.Dispose();
+    SocketClient.Dispose();
+    _websocketSubscription?.Dispose();
   }
 
   public ISubject<object> EventReceived { get; } = new Subject<object>();
@@ -33,14 +33,14 @@ public class StreamlabsEventClient : IStreamlabsEventClient, IDisposable {
       return;
     }
 
-    await WebsocketClient.Connect();
-    _websocketSubscription = WebsocketClient.OnEvent().Subscribe(OnEvent);
+    await SocketClient.Connect();
+    _websocketSubscription = SocketClient.OnEvent().Subscribe(OnEvent);
     IsSubscribed = true;
   }
 
   public async Task UnsubscribeFromEvents() {
     _websocketSubscription.Dispose();
-    await WebsocketClient.Disconnect();
+    await SocketClient.Disconnect();
   }
 
   public IObservable<IDonation> DonationReceived() {

@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Web;
 using Core.Configuration;
 using Infrastructure.Authentication;
-using Infrastructure.Streamlabs.Websocket.Dto;
+using Infrastructure.Streamlabs.Socket.Dto;
 using Infrastructure.Tests.Mocking.Http;
 using Infrastructure.Tests.Utils;
 
@@ -26,12 +26,10 @@ public static class MockHttpClientExtension {
         }
       });
 
-    client.WithPost(socketTokenUrl,
+    client.WithGet(socketTokenUrl,
       FileHelper.FromJsonFile<StreamlabsSocketToken>("Streamlabs/TestData/socket-token.json"),
       (uri, content) => {
-        var c = (FormUrlEncodedContent) content;
-
-        if (!c.HasQueryParameter("access_token")) {
+        if (!uri.HasQueryParameter("access_token")) {
           throw new Exception("Missing Auth token in query string");
         }
       });
@@ -43,6 +41,15 @@ public static class MockHttpClientExtension {
 public static class FormUrlEncodedContentExtension {
   public static bool HasQueryParameter(this FormUrlEncodedContent uri, string key) {
     var queryString = uri.ReadAsStringAsync().ToSynchronous();
+    var query = HttpUtility.ParseQueryString(queryString);
+
+    return query.Get(key) is not null;
+  }
+}
+
+public static class UrlExtension {
+  public static bool HasQueryParameter(this Uri uri, string key) {
+    var queryString = uri.Query;
     var query = HttpUtility.ParseQueryString(queryString);
 
     return query.Get(key) is not null;

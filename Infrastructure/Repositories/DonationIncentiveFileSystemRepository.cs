@@ -40,6 +40,15 @@ public class DonationIncentiveFileSystemRepository : IDonationIncentiveRepositor
     return previousState;
   }
 
+  public async Task<string> GetName() {
+    var incentive = await GetIncentiveFromFile();
+    return incentive.Name;
+  }
+
+  public Task<IDonationIncentive> SetName(string name) {
+    return UpdateIncentive(incentive => incentive.Name = name);
+  }
+
   public async Task<decimal> GetGoal() {
     var incentive = await GetIncentiveFromFile();
     return incentive.Goal;

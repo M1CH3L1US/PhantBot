@@ -2,9 +2,9 @@ using System.Reactive.Subjects;
 
 namespace Core.Streamlabs;
 
-public interface IStreamlabsWebsocketClient : IDisposable {
+public interface IStreamlabsSocketClient : IDisposable {
   public bool IsConnected { get; }
-  public ISubject<string> WebsocketEventReceived { get; }
+  public ISubject<string> SocketEventReceived { get; }
 
   public Task Connect();
   public Task Disconnect();

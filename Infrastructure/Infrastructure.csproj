@@ -17,12 +17,14 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="H.Socket.IO" Version="1.2.7" />
         <PackageReference Include="Mapster" Version="7.2.0" />
         <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.2-mauipre.1.22054.8" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.2-mauipre.1.22054.8" />
         <PackageReference Include="Microsoft.Reactive.Testing" Version="5.0.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+        <PackageReference Include="Socket.Io.Client.Core" Version="1.2.0" />
         <PackageReference Include="System.IO.Abstractions" Version="16.1.10" />
         <PackageReference Include="System.Reactive" Version="5.0.0" />
         <PackageReference Include="System.Reactive.Core" Version="5.0.0" />

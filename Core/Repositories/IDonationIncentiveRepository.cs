@@ -6,6 +6,9 @@ public interface IDonationIncentiveRepository {
   public Task<IDonationIncentive> GetOrCreate();
   public Task<IDonationIncentive> Set(IDonationIncentive donationIncentive);
 
+  public Task<string> GetName();
+  public Task<IDonationIncentive> SetName(string name);
+
   public Task<decimal> GetGoal();
   public Task<IDonationIncentive> SetGoal(decimal goal);
   public Task<IDonationIncentive> AddToGoal(decimal amount);

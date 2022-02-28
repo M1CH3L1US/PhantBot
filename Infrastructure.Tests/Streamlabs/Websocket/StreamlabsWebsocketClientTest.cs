@@ -3,26 +3,27 @@ using System.Threading.Tasks;
 using Core.Configuration;
 using Core.Streamlabs;
 using FluentAssertions;
-using Infrastructure.Streamlabs.Websocket;
-using Infrastructure.Streamlabs.Websocket.Dto;
+using Infrastructure.Streamlabs.Socket;
+using Infrastructure.Streamlabs.Socket.Dto;
 using Infrastructure.Tests.Utils;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Socket.Io.Client.Core;
 using Xunit;
 
 namespace Infrastructure.Tests.Streamlabs.Websocket;
 
 public class StreamlabsWebsocketClientTest {
-  private readonly IStreamlabsWebsocketClient _sut;
-  private readonly MockWebSocketClient _websocketClient;
+  private readonly ISocketIoClient _socketIoClient;
+  private readonly IStreamlabsSocketClient _sut;
 
   public StreamlabsWebsocketClientTest(
     IOptions<StreamlabsConfiguration> configuration,
     IStreamlabsAuthClient authClient,
-    MockWebSocketClient websocketClient
+    ISocketIoClient socketIoClient
   ) {
-    _websocketClient = websocketClient;
-    _sut = new StreamlabsWebsocketClient(websocketClient, authClient, configuration);
+    _socketIoClient = socketIoClient;
+    _sut = new StreamlabsSocketClient(socketIoClient, authClient, configuration);
   }
 
   [Fact]
@@ -50,7 +51,7 @@ public class StreamlabsWebsocketClientTest {
     var expected = JsonConvert.SerializeObject(data);
 
     _sut.OnEvent().Subscribe(e => received = e);
-    _websocketClient.ReceiveFakeMessage(data);
+    _socketIoClient.Emit("event", expected);
 
     received.Should().Be(expected);
   }

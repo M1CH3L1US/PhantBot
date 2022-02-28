@@ -1,7 +1,7 @@
 using Core.Streamlabs.Events;
 using Newtonsoft.Json;
 
-namespace Infrastructure.Streamlabs.Websocket.Dto;
+namespace Infrastructure.Streamlabs.Socket.Dto;
 
 public class BaseWebsocketEvent<T> : IBaseWebsocketEvent<T> {
   [JsonProperty("message")]

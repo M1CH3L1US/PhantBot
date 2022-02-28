@@ -70,6 +70,13 @@ public class ThreadSafeFileWriterTest {
   }
 
   [Fact]
+  public async Task WriteToFile_ShouldCreateContainingDirectory_WhenDirectoryDoesNotExist() {
+    await _sut.WriteToFile("C:/Foo/Bar/Baz/SomeFile.txt", FileContent);
+
+    File.Exists(FilePath).Should().BeTrue();
+  }
+
+  [Fact]
   public async Task ReadFromFile_ShouldReadFileContent_WhenFileContentExists() {
     await _sut.CreateFile(FilePath);
     await File.WriteAllTextAsync(FilePath, FileContent);

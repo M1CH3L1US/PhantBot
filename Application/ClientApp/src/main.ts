@@ -5,7 +5,14 @@ import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
 
 export function getBaseUrl() {
-  return document.getElementsByTagName('base')[0].href;
+  let baseHref: string;
+  if (environment.production) {
+    baseHref = document.getElementsByTagName('base')[0].href;
+  } else {
+    baseHref = 'https://localhost:7023';
+  }
+
+  return `${baseHref}/api`;
 }
 
 const providers = [{ provide: 'BASE_URL', useFactory: getBaseUrl }];

@@ -15,8 +15,11 @@ public class StreamlabsEventClientTest {
   private readonly IDonationConverter _converter;
   private readonly StreamlabsEventClient _sut;
 
-  public StreamlabsEventClientTest(IEventDtoContainer container, IStreamlabsWebsocketClient client,
-    IDonationConverter converter) {
+  public StreamlabsEventClientTest(
+    IEventDtoContainer container,
+    IStreamlabsSocketClient client,
+    IDonationConverter converter
+  ) {
     _sut = new StreamlabsEventClient(client, container);
     _converter = converter;
   }
@@ -24,7 +27,7 @@ public class StreamlabsEventClientTest {
   [Fact]
   public async void SubscribeToEvents_OpensWebsocketConnection_WhenCalled() {
     await _sut.SubscribeToEvents();
-    _sut.WebsocketClient.IsConnected.Should().BeTrue();
+    _sut.SocketClient.IsConnected.Should().BeTrue();
   }
 
   [Fact]
@@ -32,7 +35,7 @@ public class StreamlabsEventClientTest {
     await _sut.SubscribeToEvents();
     await _sut.UnsubscribeFromEvents();
 
-    _sut.WebsocketClient.IsConnected.Should().BeFalse();
+    _sut.SocketClient.IsConnected.Should().BeFalse();
   }
 
   [Theory]
@@ -44,7 +47,7 @@ public class StreamlabsEventClientTest {
     await _sut.SubscribeToEvents();
 
     _sut.EventReceived.Subscribe(e => eventData = e);
-    _sut.WebsocketClient.WebsocketEventReceived.OnNext(data);
+    _sut.SocketClient.SocketEventReceived.OnNext(data);
 
     Assert.NotNull(eventData);
   }
@@ -56,7 +59,7 @@ public class StreamlabsEventClientTest {
     await _sut.SubscribeToEvents();
 
     _sut.EventReceived.Subscribe(e => eventData = e);
-    _sut.WebsocketClient.WebsocketEventReceived.OnNext(donation);
+    _sut.SocketClient.SocketEventReceived.OnNext(donation);
 
     eventData.Should().BeAssignableTo<IStreamlabsDonation>();
   }
@@ -70,10 +73,22 @@ public class StreamlabsEventClientTest {
     await _sut.SubscribeToEvents();
 
     _sut.DonationReceived().Subscribe(e => eventData = e);
-    _sut.WebsocketClient.WebsocketEventReceived.OnNext(donation);
+    _sut.SocketClient.SocketEventReceived.OnNext(donation);
     var valueInDollars = await eventData!.ConvertToCurrency(_converter);
 
     eventData.Should().BeAssignableTo<IDonation>();
     valueInDollars.Should().BeApproximately(1m, decimal.One);
+  }
+
+  [Theory]
+  [FileContent("Streamlabs/Websocket/TestData/twitch-follow.json")]
+  public async void OnDonationReceived_DoesNotEmitEvent_WhenFollowIsReceived(string follow) {
+    IDonation? eventData = null;
+    await _sut.SubscribeToEvents();
+
+    _sut.DonationReceived().Subscribe(e => eventData = e);
+    _sut.SocketClient.SocketEventReceived.OnNext(follow);
+
+    eventData.Should().BeNull();
   }
 }

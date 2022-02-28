@@ -10,16 +10,18 @@ using Core.Streamlabs;
 using Infrastructure.Finance;
 using Infrastructure.Shared.Typing;
 using Infrastructure.Streamlabs;
-using Infrastructure.Streamlabs.Websocket;
-using Infrastructure.Streamlabs.Websocket.Dto;
+using Infrastructure.Streamlabs.Socket;
+using Infrastructure.Streamlabs.Socket.Dto;
 using Infrastructure.Tests.Authentication;
 using Infrastructure.Tests.Finance;
+using Infrastructure.Tests.Mocking;
 using Infrastructure.Tests.Mocking.Http;
 using Infrastructure.Tests.Streamlabs;
 using Infrastructure.Tests.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Socket.Io.Client.Core;
 using Websocket.Client;
 
 namespace Infrastructure.Tests;
@@ -35,9 +37,10 @@ public class Startup {
     services.Configure<TwitchConfiguration>(configuration.GetRequiredSection("Twitch"));
     services.Configure<StorageConfiguration>(configuration.GetRequiredSection("Storage"));
 
-    services.AddTransient<IStreamlabsWebsocketClient, StreamlabsWebsocketClient>();
+    services.AddTransient<IStreamlabsSocketClient, StreamlabsSocketClient>();
     services.AddTransient<IWebsocketClient, MockWebSocketClient>();
     services.AddTransient<MockWebSocketClient>();
+    services.AddTransient<ISocketIoClient, MockSocketIoClient>();
     services.AddTransient<IStreamlabsAuthClient, StreamlabsAuthClient>();
     services.AddSingleton<ICurrencyConverter, EuropeanBankCurrencyConverter>();
     services.AddTransient(provider => {
@@ -47,15 +50,18 @@ public class Startup {
                                           .MakeFinanceClient();
       return new HttpClient(handler);
     });
-    services.AddSingleton<IAuthenticationCodeStore>(_ => MockAuthenticationCodeStore
-                                                         .Create("Streamlabs")
-                                                         .Add("Twitch")
+    services.AddSingleton<IAccessTokenStore>(_ => MockAccessTokenStore
+                                                  .Create(StreamlabsTokenNameRegistry.AccessToken)
+                                                  .Add(StreamlabsTokenNameRegistry.RefreshToken)
+                                                  .Add(StreamlabsTokenNameRegistry.AutorizationCode)
+                                                  .Add("Twitch")
     );
     services.AddSingleton<IEventDtoContainer>(_ => {
       var events = new List<IEventDto> {
         new StreamlabsDonation(),
         new TwitchSubscription(),
-        new TwitchBitsCheer()
+        new TwitchBitsCheer(),
+        new TwitchFollow()
       };
 
       return new EventDtoContainer(events);

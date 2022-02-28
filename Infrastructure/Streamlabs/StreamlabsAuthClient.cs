@@ -1,16 +1,16 @@
+using System.Net;
 using Core.Authentication;
 using Core.Configuration;
 using Core.Streamlabs;
 using Infrastructure.Authentication;
-using Infrastructure.Streamlabs.Websocket.Dto;
+using Infrastructure.Streamlabs.Socket.Dto;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace Infrastructure.Streamlabs;
 
 public class StreamlabsAuthClient : IStreamlabsAuthClient {
-  private const string Category = "Streamlabs";
-  internal readonly IAuthenticationCodeStore AuthenticationCodeStore;
+  internal readonly IAccessTokenStore AccessTokenStore;
   internal readonly StreamlabsConfiguration Configuration;
   internal readonly HttpClient HttpClient;
 
@@ -20,11 +20,11 @@ public class StreamlabsAuthClient : IStreamlabsAuthClient {
   public StreamlabsAuthClient(
     HttpClient httpClient,
     IOptions<StreamlabsConfiguration> configuration,
-    IAuthenticationCodeStore authenticationCodeStore
+    IAccessTokenStore accessTokenStore
   ) {
     Configuration = configuration.Value;
     HttpClient = httpClient;
-    AuthenticationCodeStore = authenticationCodeStore;
+    AccessTokenStore = accessTokenStore;
   }
 
   public Task NotifyAuthorizationCodeObtained() {
@@ -72,9 +72,10 @@ public class StreamlabsAuthClient : IStreamlabsAuthClient {
 
     var body = new HttpRequestBody();
     body.Add("access_token", accessToken);
-    var content = body.ToFormUrlEncodedContent();
 
-    var response = await HttpClient.PostAsync(url, content);
+    var urlWithQuery = await AppendQueryParamsFromContent(url, body);
+
+    var response = await HttpClient.GetAsync(urlWithQuery);
     var responseBody = await response.Content.ReadAsStringAsync();
     var tokenResponse = JsonConvert.DeserializeObject<StreamlabsSocketToken>(responseBody)!;
 
@@ -82,36 +83,62 @@ public class StreamlabsAuthClient : IStreamlabsAuthClient {
   }
 
   private async Task FetchAccessTokenPair(string? refreshToken = null) {
+    if (AccessTokenStore.HasToken(StreamlabsTokenNameRegistry.AccessToken)) {
+      TokenPair = new AccessTokenPair {
+        AccessToken = AccessTokenStore.GetToken(StreamlabsTokenNameRegistry.AccessToken)!,
+        RefreshToken = AccessTokenStore.GetToken(StreamlabsTokenNameRegistry.RefreshToken)!,
+        TokenType = "bearer"
+      };
+      return;
+    }
+
+
     var body = GetAuthenticationBody(refreshToken);
     var content = body.ToFormUrlEncodedContent();
     var responseMessage = await HttpClient.PostAsync($"{Configuration.BaseUri}/token", content);
-
     var responseBody = await responseMessage.Content.ReadAsStringAsync();
+
+    if (responseMessage.StatusCode != HttpStatusCode.OK) {
+      throw new Exception($"Failed to obtain access token pair {responseBody}");
+    }
+
     var tokenPair = JsonConvert.DeserializeObject<AccessTokenPair>(responseBody);
 
     TokenPair = tokenPair;
+    AccessTokenStore.SetToken(StreamlabsTokenNameRegistry.AccessToken, tokenPair!.AccessToken);
+    AccessTokenStore.SetToken(StreamlabsTokenNameRegistry.RefreshToken, tokenPair!.RefreshToken);
   }
 
   private HttpRequestBody GetAuthenticationBody(string? refreshToken = null) {
     var body = new HttpRequestBody();
     var grantType = GetGrantType(refreshToken);
-    var authenticationCode = AuthenticationCodeStore.GetAuthenticationCode(Category);
+    var accessCode = AccessTokenStore.GetToken("streamlabs_auth_code");
 
-    if (authenticationCode is null) {
+    if (accessCode is null) {
       throw new Exception("Cannot obtain auth token before obtaining authentication code");
     }
 
     if (!string.IsNullOrEmpty(refreshToken)) {
       body.Add("refresh_token", refreshToken);
     }
+    else {
+      body.Add("code", accessCode);
+    }
 
     body.Add("grant_type", grantType);
     body.Add("client_id", Configuration.ClientId);
     body.Add("client_secret", Configuration.ClientSecret);
     body.Add("redirect_uri", Configuration.RedirectUri);
-    body.Add("code", authenticationCode);
 
     return body;
+  }
+
+  private async Task<string> AppendQueryParamsFromContent(string url, HttpRequestBody body) {
+    var content = body.ToFormUrlEncodedContent();
+    var queryPrams = await content.ReadAsStringAsync();
+    var urlWithBody = $"{url}?{queryPrams}";
+
+    return urlWithBody;
   }
 
   private bool HasTokenPair() {

@@ -1,2 +1,6 @@
-<pb-nav-bar></pb-nav-bar>
-<router-outlet></router-outlet>
+<div class="view-wrapper">
+  <ng-container *ngIf="shouldShowNavBar | async">
+    <pb-nav-bar></pb-nav-bar>
+  </ng-container>
+  <router-outlet></router-outlet>
+</div>

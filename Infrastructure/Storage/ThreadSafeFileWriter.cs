@@ -7,12 +7,13 @@ public class ThreadSafeFileWriter : IThreadSafeFileWriter {
   private readonly IFileSystem _fileSystem;
   private readonly TimeSpan _writeTimeout;
 
-  public ThreadSafeFileWriter(IFileSystem fileSystem, TimeSpan? writeTimeout) {
+  public ThreadSafeFileWriter(IFileSystem fileSystem, TimeSpan? writeTimeout = null) {
     _writeTimeout = writeTimeout ?? TimeSpan.FromSeconds(10);
     _fileSystem = fileSystem;
   }
 
   public IFile File => _fileSystem.File;
+  public IDirectory Directory => _fileSystem.Directory;
 
   public Task CreateFile(string path) {
     if (FileExists(path)) {
@@ -32,6 +33,10 @@ public class ThreadSafeFileWriter : IThreadSafeFileWriter {
   }
 
   public Task WriteToFile(string path, string content) {
+    if (!FileDirectoryExists(path)) {
+      CreateFileDirectory(path);
+    }
+
     var action = () => File.WriteAllText(path, content);
     return CallActionInMutex(path, action);
   }
@@ -68,6 +73,27 @@ public class ThreadSafeFileWriter : IThreadSafeFileWriter {
         }
       }
     });
+  }
+
+  private bool FileDirectoryExists(string path) {
+    var directory = GetFileDirectory(path);
+    return Directory.Exists(directory.FullName);
+  }
+
+  private void CreateFileDirectory(string path) {
+    if (FileDirectoryExists(path)) {
+      return;
+    }
+
+    var directory = GetFileDirectory(path);
+    Directory.CreateDirectory(directory.FullName);
+  }
+
+  private DirectoryInfo GetFileDirectory(string path) {
+    var fullPath = Path.GetFullPath(path);
+    var fileInfo = new FileInfo(fullPath);
+
+    return fileInfo.Directory;
   }
 
   private Mutex GetMutex(string path) {
