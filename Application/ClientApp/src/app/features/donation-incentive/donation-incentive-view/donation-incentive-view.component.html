@@ -1,0 +1,15 @@
+<div class="view-container">
+  <div class="component-wrapper">
+    <ng-container *ngIf="hasRegisteredStreamlabs; else registration">
+      <pb-incentive-view
+        (incentiveUpdate)="onIncentiveUpdate($event)"
+        [incentive]="incentive$ | async"
+      >
+      </pb-incentive-view>
+    </ng-container>
+
+    <ng-template #registration>
+      <pb-incentive-registration></pb-incentive-registration>
+    </ng-template>
+  </div>
+</div>

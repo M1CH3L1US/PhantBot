@@ -1,0 +1,67 @@
+<div class="view-container">
+  <h1 mat-dialog-title>Update Incentive</h1>
+
+  <div class="edit-container">
+    <form [formGroup]="incentiveFormGroup" class="edit-incentive">
+      <mat-form-field>
+        <mat-label>Incentive Name</mat-label>
+        <input matInput formControlName="name" placeholder="Incentive Name" />
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Incentive Amount</mat-label>
+        <input
+          matInput
+          formControlName="amount"
+          placeholder="Incentive Amount"
+          type="number"
+        />
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Incentive Goal</mat-label>
+        <input
+          matInput
+          formControlName="goal"
+          placeholder="Incentive Goal"
+          type="number"
+        />
+      </mat-form-field>
+    </form>
+
+    <form [formGroup]="typographyFormGroup" class="edit-font-preference">
+      <mat-form-field>
+        <mat-label>Display Font</mat-label>
+        <mat-select formControlName="font">
+          <mat-option value="Inter">Inter</mat-option>
+          <mat-option *ngFor="let font of fontsAvailable" [value]="font">{{
+            font
+          }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Font Style</mat-label>
+        <mat-select formControlName="style">
+          <mat-option
+            *ngFor="let style of fontStylesAvailable"
+            [value]="style"
+            >{{ style }}</mat-option
+          >
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Font Size</mat-label>
+        <input
+          formControlName="size"
+          matInput
+          placeholder="Font Size in Px."
+          type="number"
+        />
+      </mat-form-field>
+    </form>
+  </div>
+
+  <button (click)="save()" color="primary" mat-flat-button>Save</button>
+</div>

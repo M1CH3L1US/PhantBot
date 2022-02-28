@@ -1,0 +1,23 @@
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+}
+
+.tracker-container {
+  padding: 1rem;
+
+  .tracker-header {
+    padding: 0.25rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  .tracker-stats {
+    display: flex;
+    justify-content: center;
+  }
+}

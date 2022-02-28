@@ -1,0 +1,16 @@
+<ng-container *ngIf="incentive; else noIncentiveAvailable">
+  <div class="tracker-container">
+    <div class="tracker-header">
+      {{ incentive.name }}
+    </div>
+
+    <div class="tracker-stats">
+      ${{ incentive.amount }} / ${{ incentive.goal }} -
+      {{ incentive.percentageCompleted }}%
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #noIncentiveAvailable>
+  It seems that there is no incentive to display 😥
+</ng-template>
