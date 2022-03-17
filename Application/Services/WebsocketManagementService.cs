@@ -23,7 +23,11 @@ public class WebsocketManagementService : IHostedService {
   }
 
   private Task UnsubscribeFromEvents() {
-    return _streamlabsEventClient.UnsubscribeFromEvents();
+    if (_streamlabsEventClient is not null) {
+      return _streamlabsEventClient.UnsubscribeFromEvents();
+    }
+
+    return Task.CompletedTask;
   }
 
   public Task ConnectToStreamlabs() {

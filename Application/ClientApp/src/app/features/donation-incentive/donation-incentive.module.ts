@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { DonationIncentiveRouterModule } from '@features/donation-incentive/donation-incentive-router.module';
 import { SignalRModule } from '@shared/modules/signalr/signalr.module';
@@ -28,6 +29,7 @@ import { IncentiveViewComponent } from './incentive-view/incentive-view.componen
     MatButtonModule,
     MatDialogModule,
     MatInputModule,
+    MatProgressBarModule,
     MatSelectModule,
     ReactiveFormsModule,
     FormsModule,

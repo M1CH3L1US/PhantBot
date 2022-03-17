@@ -7,7 +7,8 @@ import { environment } from './environments/environment';
 export function getBaseUrl() {
   let baseHref: string;
   if (environment.production) {
-    baseHref = document.getElementsByTagName('base')[0].href;
+    const url = document.getElementsByTagName('base')[0].href;
+    baseHref = url.substring(0, url.length - 1);
   } else {
     baseHref = 'https://localhost:7023';
   }

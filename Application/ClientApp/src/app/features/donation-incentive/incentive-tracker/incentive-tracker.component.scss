@@ -9,6 +9,15 @@
 
 .tracker-container {
   padding: 1rem;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  .progress-bar {
+    height: 1rem;
+    margin: 0.5rem 0;
+    width: 120%;
+  }
 
   .tracker-header {
     padding: 0.25rem;

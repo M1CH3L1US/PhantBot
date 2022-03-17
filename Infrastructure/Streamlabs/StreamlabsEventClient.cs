@@ -66,6 +66,8 @@ public class StreamlabsEventClient : IStreamlabsEventClient, IDisposable {
       return;
     }
 
+    Console.WriteLine(eventData);
+
     var genericEventType = typeof(BaseWebsocketEvent<>).MakeGenericType(dtoType);
     var dto = JsonConvert.DeserializeObject(eventData, genericEventType);
     var data = GetEventDataFromDto(dto);

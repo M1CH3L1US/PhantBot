@@ -5,6 +5,7 @@ using Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 const string localhostCorsPolicy = "LocalhostCorsPolicy";
+
 ConfigureServices(builder);
 
 var app = builder.Build();
@@ -15,7 +16,7 @@ app.Run();
 void ApplyCors(IServiceCollection servies) {
   servies.AddCors(options => {
     options.AddPolicy(localhostCorsPolicy, builder => {
-      builder.WithOrigins("http://localhost:4200")
+      builder.WithOrigins("https://localhost:5001")
              .AllowAnyMethod()
              .AllowAnyHeader()
              .AllowCredentials();
@@ -45,14 +46,15 @@ void ConfigureServices(WebApplicationBuilder builder) {
 }
 
 void ConfigureApplication(WebApplication app) {
-  if (!app.Environment.IsDevelopment()) {
+  /*
+   if (!app.Environment.IsDevelopment()) {
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
   }
+  app.UseHttpsRedirection();
+*/
 
   app.UseCors(localhostCorsPolicy);
-
-  app.UseHttpsRedirection();
   app.UseStaticFiles();
   app.UseRouting();
 
