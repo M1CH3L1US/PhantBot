@@ -15,7 +15,6 @@ public class StreamlabsEventClient : IStreamlabsEventClient, IDisposable {
     Container = container;
   }
 
-  public IStreamlabsSocketClient SocketClient { get; }
   internal IDisposable _websocketSubscription { get; set; }
   internal IEventDtoContainer Container { get; }
 
@@ -23,6 +22,8 @@ public class StreamlabsEventClient : IStreamlabsEventClient, IDisposable {
     SocketClient.Dispose();
     _websocketSubscription?.Dispose();
   }
+
+  public IStreamlabsSocketClient SocketClient { get; }
 
   public ISubject<object> EventReceived { get; } = new Subject<object>();
 
@@ -60,23 +61,18 @@ public class StreamlabsEventClient : IStreamlabsEventClient, IDisposable {
   }
 
   public void OnEvent(string eventData) {
+    Console.WriteLine(eventData);
     var dtoType = GetDtoTypeFromEvent(eventData);
 
     if (dtoType is null) {
       return;
     }
 
-    Console.WriteLine(eventData);
-
     var genericEventType = typeof(BaseWebsocketEvent<>).MakeGenericType(dtoType);
     var dto = JsonConvert.DeserializeObject(eventData, genericEventType);
     var data = GetEventDataFromDto(dto);
 
     EventReceived.OnNext(data);
-
-    if (data is IDonation donation) {
-      EventReceived.OnNext(donation);
-    }
   }
 
   private Type? GetDtoTypeFromEvent(string eventData) {

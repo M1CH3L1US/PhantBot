@@ -41,7 +41,8 @@ void ConfigureServices(WebApplicationBuilder builder) {
   services.AddInfrastructure(builder.Configuration);
   services.AddSignalR();
   services.AddSingleton<WebsocketManagementService>();
-  services.AddScoped<DonationIncentiveHub>();
+  services.AddSingleton<HubManagementService>();
+  services.AddHostedService(provider => provider.GetRequiredService<HubManagementService>());
   services.AddHostedService(provider => provider.GetRequiredService<WebsocketManagementService>());
 }
 

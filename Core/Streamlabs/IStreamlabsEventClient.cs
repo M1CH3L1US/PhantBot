@@ -5,6 +5,7 @@ using Core.Streamlabs.Events;
 namespace Core.Streamlabs;
 
 public interface IStreamlabsEventClient {
+  public IStreamlabsSocketClient SocketClient { get; }
   public ISubject<object> EventReceived { get; }
   public bool IsSubscribed { get; }
   public Task SubscribeToEvents();

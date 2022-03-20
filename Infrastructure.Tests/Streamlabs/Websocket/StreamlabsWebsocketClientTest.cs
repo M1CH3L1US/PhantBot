@@ -55,4 +55,24 @@ public class StreamlabsWebsocketClientTest {
 
     received.Should().Be(expected);
   }
+
+  [Fact]
+  public async Task OnEvent_ShouldEmitAllEvents_WhenMultipleEventsAreEmitted() {
+    await _sut.Connect();
+    var slDonationEvent = FileHelper.GetFileContent("Streamlabs/Websocket/TestData/donation.json");
+    var twitchSubscriptionEvent = FileHelper.GetFileContent("Streamlabs/Websocket/TestData/twitch-subscription.json");
+    var twitchBitsEvent = FileHelper.GetFileContent("Streamlabs/Websocket/TestData/twitch-bits.json");
+
+    string? received = null;
+    _sut.OnEvent().Subscribe(e => received = e);
+
+    _socketIoClient.Emit("event", slDonationEvent);
+    received.Should().Be(slDonationEvent);
+    _socketIoClient.Emit("event", twitchSubscriptionEvent);
+    received.Should().Be(twitchSubscriptionEvent);
+    _socketIoClient.Emit("event", twitchBitsEvent);
+    received.Should().Be(twitchBitsEvent);
+    _socketIoClient.Emit("event", twitchSubscriptionEvent);
+    received.Should().Be(twitchSubscriptionEvent);
+  }
 }

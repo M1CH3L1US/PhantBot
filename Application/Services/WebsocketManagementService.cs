@@ -1,13 +1,19 @@
+using Application.Hubs;
 using Core.Authentication;
 using Core.Streamlabs;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Application.Services;
 
 public class WebsocketManagementService : IHostedService {
   private readonly IAccessTokenStore _codeStore;
+  private readonly IHubContext<DonationIncentiveHub> _donationIncentiveHubContext;
   private readonly IStreamlabsEventClient _streamlabsEventClient;
 
-  public WebsocketManagementService(IAccessTokenStore codeStore, IStreamlabsEventClient streamlabsEventClient) {
+  public WebsocketManagementService(
+    IAccessTokenStore codeStore,
+    IStreamlabsEventClient streamlabsEventClient
+  ) {
     _codeStore = codeStore;
     _streamlabsEventClient = streamlabsEventClient;
   }
@@ -31,6 +37,7 @@ public class WebsocketManagementService : IHostedService {
   }
 
   public Task ConnectToStreamlabs() {
+    Console.WriteLine("Connecting to Streamlabs...");
     return _streamlabsEventClient.SubscribeToEvents();
   }
 }

@@ -80,6 +80,26 @@ public class StreamlabsEventClientTest {
     valueInDollars.Should().BeApproximately(1m, decimal.One);
   }
 
+  [Fact]
+  public async void OnDonationReceived_EmitsIDonationEvent_WhenEvenMultipleEventsAreReceived() {
+    var slDonationEvent = FileHelper.GetFileContent("Streamlabs/Websocket/TestData/donation.json");
+    var twitchSubscriptionEvent = FileHelper.GetFileContent("Streamlabs/Websocket/TestData/twitch-subscription.json");
+    var twitchBitsEvent = FileHelper.GetFileContent("Streamlabs/Websocket/TestData/twitch-bits.json");
+
+    IDonation? eventData = null;
+    await _sut.SubscribeToEvents();
+
+    _sut.DonationReceived().Subscribe(e => eventData = e);
+    _sut.SocketClient.SocketEventReceived.OnNext(slDonationEvent);
+    eventData.Should().BeAssignableTo<IStreamlabsDonation>();
+    _sut.SocketClient.SocketEventReceived.OnNext(twitchSubscriptionEvent);
+    eventData.Should().BeAssignableTo<ITwitchSubscription>();
+    _sut.SocketClient.SocketEventReceived.OnNext(twitchBitsEvent);
+    eventData.Should().BeAssignableTo<ITwitchBitsCheer>();
+    _sut.SocketClient.SocketEventReceived.OnNext(twitchSubscriptionEvent);
+    eventData.Should().BeAssignableTo<ITwitchSubscription>();
+  }
+
   [Theory]
   [FileContent("Streamlabs/Websocket/TestData/twitch-follow.json")]
   public async void OnDonationReceived_DoesNotEmitEvent_WhenFollowIsReceived(string follow) {
